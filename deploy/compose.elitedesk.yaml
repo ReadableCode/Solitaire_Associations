@@ -15,8 +15,9 @@ services:
       POSTGRES_URL: postgres
       POSTGRES_PORT: "5432"
       POSTGRES_DB: apps
-      # Enable after the app is verified stable (git deploy of this line):
-      # SOLITAIRE_IMPORT_SYNCPLEX_USERS: /syncplex_data/users.json
+      # Idempotent Sync_Plex account import: inserts missing accounts (hash
+      # intact) at startup, never touches existing rows or the mounted file.
+      SOLITAIRE_IMPORT_SYNCPLEX_USERS: /syncplex_data/users.json
     env_file:
       - ../personal_credentials/personal.env
     volumes:
