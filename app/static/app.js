@@ -189,6 +189,7 @@ function renderHome() {
 async function startLevel(levelId, { fresh = false } = {}) {
   const level = await api(`/api/levels/${levelId}`);
   S.level = level;
+  S.icons = level.icons || {};
   S.key = engine.answerKey(level);
   if (!fresh && S.savedGame && S.savedGame.levelId === levelId) {
     const resumed = engine.resumeGame(level, S.savedGame);
@@ -319,6 +320,35 @@ async function onQuitToMap() {
 
 // --- game rendering ----------------------------------------------------------
 
+// Art for a face-up card: self-hosted Noto Emoji SVG when the word is mapped,
+// otherwise a deterministic monogram medallion (hue hashed from the word).
+function cardArt(word) {
+  const id = S.icons?.[word];
+  if (id) {
+    return el("img", {
+      class: "art",
+      src: `/static/img/emoji/${id}.svg`,
+      alt: "",
+      loading: "lazy",
+      draggable: "false",
+    });
+  }
+  let h = 0;
+  for (const c of word) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const hue = h % 360;
+  const wrap = el("div", { class: "art" });
+  wrap.innerHTML =
+    `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">` +
+    `<circle cx="20" cy="20" r="17" fill="hsl(${hue} 42% 88%)" stroke="hsl(${hue} 42% 46%)" stroke-width="2"/>` +
+    `<text x="20" y="26.5" text-anchor="middle" font-family="Georgia, serif" font-weight="700" ` +
+    `font-size="17" fill="hsl(${hue} 48% 30%)">${word[0]}</text></svg>`;
+  return wrap;
+}
+
+function cardFace(word) {
+  return [cardArt(word), el("span", { class: "word" }, word)];
+}
+
 function renderGame() {
   const st = S.game.state;
   const hud = el("div", { class: "hud" },
@@ -350,7 +380,7 @@ function renderGame() {
         return el("div", {
           class: `card ${card.up ? "up" : "down"} ${top && isSel ? "selected" : ""}`,
           onclick: top ? (e) => { e.stopPropagation(); onColumnTap(i); } : undefined,
-        }, card.up ? card.w : "");
+        }, card.up ? cardFace(card.w) : "");
       });
       return el("div", { class: "column", onclick: () => onColumnTap(i) },
         cards.length ? cards : el("div", { class: "column-empty" }, "empty"));
@@ -370,7 +400,7 @@ function renderGame() {
         ? el("div", {
             class: `card up ${wasteSel ? "selected" : ""}`,
             onclick: () => onSelect({ type: "waste" }),
-          }, wasteTop)
+          }, cardFace(wasteTop))
         : el("div", { class: "column-empty" }, "waste"),
       el("div", { class: "pile-label" }, st.waste.length ? `waste (${st.waste.length})` : "waste")));
 

@@ -51,6 +51,15 @@ Standard federation: `deploy/compose.elitedesk.yaml` is `include:`d by
 `solitaire-web`; SWAG proxies `solitaire.tinkernet.me` → `solitaire_web:8790`.
 Push to master and the elitedesk cron does the rest.
 
+## Card art
+
+`data/word_emoji.json` maps every level word to an emoji (or null).
+`scripts/fetch_emoji_assets.py` syncs the referenced Noto Emoji SVGs into
+`app/static/img/emoji/` (committed; see `licenses/`). The backend injects
+per-level `icons` ids; unmapped words get a procedural monogram medallion
+client-side. After editing levels or the mapping, rerun the fetch script —
+`tests/test_icons.py` fails if any mapped glyph is missing from disk.
+
 ## Tests
 
 ```

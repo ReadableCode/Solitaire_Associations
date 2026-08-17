@@ -139,7 +139,17 @@ button.primary {
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);
   color: var(--card-ink);
   cursor: pointer;
+  flex-direction: column;
+  gap: 3px;
 }
+.card .art {
+  width: 42%; aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.card .art svg, img.art { width: 42%; aspect-ratio: 1; pointer-events: none; }
+.card .art svg { width: 100%; height: 100%; }
+.card .word { display: block; pointer-events: none; }
 /* corner ornaments, like index pips */
 .card.up::before, .card.up::after {
   content: "\2666"; /* diamond */

@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
-from . import auth, bootstrap, config, store, syncplex_import
+from . import auth, bootstrap, config, icons, store, syncplex_import
 from .users import UserStore, db_reachable
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
@@ -44,6 +44,7 @@ def _load_levels() -> None:
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     _load_levels()
+    icons.load()
     await run_in_threadpool(bootstrap.bootstrap_best_effort)
     await run_in_threadpool(syncplex_import.import_best_effort, users)
     yield
@@ -156,7 +157,7 @@ async def level_detail(level_id: int, request: Request):
     lvl = _levels_by_id.get(level_id)
     if lvl is None:
         raise HTTPException(status_code=404, detail="no such level")
-    return lvl
+    return {**lvl, "icons": icons.icons_for_level(lvl)}
 
 
 # --- game state (all through PostgREST) ---------------------------------------
