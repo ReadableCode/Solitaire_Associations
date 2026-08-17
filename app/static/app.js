@@ -363,7 +363,7 @@ function renderGame() {
       el("div", {
         class: `stock-card ${st.stock.length ? "" : "empty"}`,
         onclick: () => guarded(() => engine.draw(S.game)),
-      }, st.stock.length ? String(st.stock.length) : (st.waste.length ? "recycle" : "")),
+      }, el("span", {}, st.stock.length ? String(st.stock.length) : (st.waste.length ? "recycle" : ""))),
       el("div", { class: "pile-label" }, "deck")),
     el("div", { class: "pile" },
       wasteTop
