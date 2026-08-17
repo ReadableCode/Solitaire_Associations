@@ -38,6 +38,17 @@ function columnsForDifficulty(difficulty) {
   return 6;
 }
 
+// Per-level difficulty knobs, set by gen_levels.py. The fallbacks are the
+// old flat values, so a level authored before the curve still plays.
+const DEFAULT_TABLEAU_FRAC = 0.6;
+const DEFAULT_HINTS = 3;
+const DEFAULT_JOKERS = 1;
+
+function knob(level, name, fallback) {
+  const v = level[name];
+  return typeof v === "number" && Number.isFinite(v) ? v : fallback;
+}
+
 export function answerKey(level) {
   const key = new Map();
   level.categories.forEach((cat, i) => cat.words.forEach((w) => key.set(w, i)));
@@ -49,7 +60,9 @@ export function createGame(level, seed) {
   const allWords = level.categories.flatMap((c) => c.words);
   const deck = shuffled(allWords, rng);
   const numCols = columnsForDifficulty(level.difficulty);
-  const tableauCount = Math.ceil(deck.length * 0.6);
+  const tableauCount = Math.ceil(
+    deck.length * knob(level, "tableau_frac", DEFAULT_TABLEAU_FRAC)
+  );
   const columns = Array.from({ length: numCols }, () => []);
   for (let i = 0; i < tableauCount; i++) {
     columns[i % numCols].push({ w: deck[i], up: false });
@@ -63,8 +76,8 @@ export function createGame(level, seed) {
     difficulty: level.difficulty,
     moveBudget: level.move_budget,
     movesLeft: level.move_budget,
-    hintsLeft: 3,
-    jokersLeft: 1,
+    hintsLeft: knob(level, "hints", DEFAULT_HINTS),
+    jokersLeft: knob(level, "jokers", DEFAULT_JOKERS),
     wrongGuesses: 0,
     status: "playing",
     slots: level.categories.map((c) => ({

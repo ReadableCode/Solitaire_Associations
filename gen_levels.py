@@ -1,4 +1,4 @@
-import json, sys
+import json, math, sys
 
 # Each quad: 4 (name, "PIPE|SEP|WORDS") tuples. EASY=6 words/cat, MED=6, HARD=7.
 EASY = [
@@ -119,23 +119,48 @@ for n, locs in names.items():
         print(f"NAME ERR: '{n}' in {locs}"); ok = False
 if not ok: sys.exit(1)
 
-def level(lid, diff, quad, lo, hi, budget):
+# --- difficulty curve --------------------------------------------------------
+# Every knob used to scale with card count, so the pressure was identical at
+# level 1 and level 150 (~5x the perfect-solve budget, 60% burial, 3 hints +
+# 1 joker throughout). These ramp on level id instead, so difficulty also
+# climbs *within* a tier and not only at the 31/61/91/121 boundaries.
+
+TOTAL_LEVELS = 150
+
+def curve(lid):
+    p = (lid - 1) / (TOTAL_LEVELS - 1)         # 0.0 at level 1 -> 1.0 at level 150
+    tableau_frac = round(0.60 + 0.30 * p, 4)   # share of the deck dealt face-down
+    budget_ratio = 3.5 - 2.25 * p              # multiple of a perfect solve
+    hints = 3 if p < 0.20 else 2 if p < 0.45 else 1 if p < 0.70 else 0
+    jokers = 1 if p < 0.50 else 0
+    return tableau_frac, budget_ratio, hints, jokers
+
+def level(lid, diff, quad, lo, hi):
+    cats = [{"name": n, "words": words(ws)[lo:hi]} for n, ws in quad]
+    cards = sum(len(c["words"]) for c in cats)
+    tableau_frac, budget_ratio, hints, jokers = curve(lid)
+    # A perfect solve is one placement per card plus one draw per stock card;
+    # the engine deals ceil(cards * tableau_frac) to the tableau.
+    stock = cards - math.ceil(cards * tableau_frac)
+    budget = round((cards + stock) * budget_ratio)
     return {"id": lid, "difficulty": diff, "move_budget": budget,
-            "categories": [{"name": n, "words": words(ws)[lo:hi]} for n, ws in quad]}
+            "tableau_frac": tableau_frac, "hints": hints, "jokers": jokers,
+            "categories": cats}
 
 levels = []
 for i in range(30):   # diff 1: 4 words, 16 cards
-    levels.append(level(i + 1, 1, EASY[i], 0, 4, 110))
+    levels.append(level(i + 1, 1, EASY[i], 0, 4))
 for i in range(30):   # diff 2: 5 words, 20 cards (reversed quad order, different slice)
-    levels.append(level(i + 31, 2, EASY[29 - i], 1, 6, 130))
+    levels.append(level(i + 31, 2, EASY[29 - i], 1, 6))
 for i in range(15):   # diff 3 first pass
-    levels.append(level(i + 61, 3, MED[i], 0, 5, 135))
+    levels.append(level(i + 61, 3, MED[i], 0, 5))
 for i in range(15):   # diff 3 second pass, different slice
-    levels.append(level(i + 76, 3, MED[14 - i], 1, 6, 135))
+    levels.append(level(i + 76, 3, MED[14 - i], 1, 6))
 for i in range(30):   # diff 4: 6 words, 24 cards
-    levels.append(level(i + 91, 4, HARD[i], 0, 6, 160))
+    levels.append(level(i + 91, 4, HARD[i], 0, 6))
 for i in range(30):   # diff 5: 7 words, 28 cards
-    levels.append(level(i + 121, 5, HARD[29 - i], 0, 7, 195))
+    levels.append(level(i + 121, 5, HARD[29 - i], 0, 7))
+assert len(levels) == TOTAL_LEVELS, len(levels)
 
 with open("/Users/jason/GitHub/Solitaire_Associations/data/levels.json", "w") as f:
     json.dump(levels, f, indent=2)

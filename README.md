@@ -25,6 +25,31 @@ card, undo refunds the last move.
 - Game state autosaves after every move (debounced, `sendBeacon` on tab
   close). There is no save/load UI — reload resumes exactly.
 
+## Difficulty
+
+150 levels. Card count steps up by tier (16 / 20 / 20 / 24 / 28 cards at
+difficulty 1-5), but the *pressure* ramps on level id, so a level also gets
+harder within its tier rather than only at the 31/61/91/121 boundaries.
+`curve()` in `gen_levels.py` is the single knob; it bakes three fields into
+each level in `data/levels.json`:
+
+| field | level 1 | level 150 |
+| --- | --- | --- |
+| `move_budget` | 3.5x a perfect solve | 1.27x |
+| `tableau_frac` | 60% of the deck dealt face-down | 90% |
+| `hints` / `jokers` | 3 / 1 | 0 / 0 |
+
+A perfect solve is one placement per card plus one draw per stock card, so
+the budget is never below it — `tests/test_engine.mjs` plays all 150 levels
+with full knowledge on 5 seeds each and asserts every one is winnable.
+`tests/test_levels.py` asserts the curve is monotonic: no level may offer
+more slack, deeper hints, or a shallower tableau than the level before it.
+
+Re-tune by editing `curve()` and running `python3 gen_levels.py`, which
+rewrites `data/levels.json` deterministically from the quad bank above it.
+`engine.js` falls back to the old flat values (60% / 3 / 1) for any level
+missing the fields.
+
 ## Schema bootstrap
 
 `app/bootstrap.py` converges the schema at startup (Book-Bot pattern):

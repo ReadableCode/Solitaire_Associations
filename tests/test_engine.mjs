@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import * as engine from "../app/static/engine.js";
 
 const LEVEL = {
@@ -42,6 +43,25 @@ test("deal covers every word exactly once, deterministic per seed", () => {
 test("difficulty scales column count", () => {
   const lvl5 = { ...LEVEL, difficulty: 5 };
   assert.equal(engine.createGame(lvl5, 1).columns.length, 6);
+});
+
+test("per-level knobs override the flat defaults", () => {
+  const base = engine.createGame(LEVEL, 5);
+  assert.equal(base.hintsLeft, 3); // fallback when the level omits them
+  assert.equal(base.jokersLeft, 1);
+  assert.equal(base.stock.length, 16 - Math.ceil(16 * 0.6));
+
+  const late = engine.createGame(
+    { ...LEVEL, tableau_frac: 0.9, hints: 0, jokers: 0 },
+    5
+  );
+  assert.equal(late.hintsLeft, 0);
+  assert.equal(late.jokersLeft, 0);
+  assert.equal(late.stock.length, 16 - Math.ceil(16 * 0.9));
+  // deeper burial: more cards dealt face-down into the same columns
+  const buried = (s) =>
+    s.columns.reduce((n, c) => n + c.filter((card) => !card.up).length, 0);
+  assert.ok(buried(late) > buried(base));
 });
 
 test("draw moves stock to waste, costs a move, recycles when empty", () => {
@@ -114,7 +134,7 @@ test("hint returns the right slot without costing a move; joker places free", ()
   assert.throws(() => engine.joker(game, { type: "column", index: 0 }, KEY), engine.GameError);
 });
 
-function solve(game) {
+function solve(game, key = KEY) {
   // Greedy: place whatever is accessible; draw when nothing is.
   let safety = 2000;
   while (game.state.status === "playing" && safety-- > 0) {
@@ -122,7 +142,7 @@ function solve(game) {
     for (let i = 0; i < game.state.columns.length; i++) {
       const word = engine.topOfColumn(game.state, i);
       if (word != null) {
-        engine.place(game, { type: "column", index: i }, KEY.get(word), KEY);
+        engine.place(game, { type: "column", index: i }, key.get(word), key);
         placed = true;
         break;
       }
@@ -130,7 +150,7 @@ function solve(game) {
     if (placed || game.state.status !== "playing") continue;
     const wasteWord = engine.topOfWaste(game.state);
     if (wasteWord != null) {
-      engine.place(game, { type: "waste" }, KEY.get(wasteWord), KEY);
+      engine.place(game, { type: "waste" }, key.get(wasteWord), key);
     } else {
       engine.draw(game);
     }
@@ -142,6 +162,26 @@ test("perfect play wins within budget on many seeds", () => {
   for (let seed = 1; seed <= 50; seed++) {
     const game = engine.newGame(LEVEL, seed);
     assert.equal(solve(game), "won", `seed ${seed}`);
+  }
+});
+
+// The late levels run on a very tight budget (~1.3x a perfect solve), so an
+// off-by-one in the curve would ship unwinnable levels. Play the real bank.
+test("every shipped level is winnable by a player who knows every answer", () => {
+  const levels = JSON.parse(
+    readFileSync(new URL("../data/levels.json", import.meta.url))
+  );
+  assert.equal(levels.length, 150);
+  for (const level of levels) {
+    const key = engine.answerKey(level);
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const game = engine.newGame(level, seed);
+      assert.equal(
+        solve(game, key),
+        "won",
+        `level ${level.id} (budget ${level.move_budget}) unwinnable at seed ${seed}`
+      );
+    }
   }
 });
 
