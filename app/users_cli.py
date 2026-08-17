@@ -1,4 +1,4 @@
-"""Account management CLI — Sync_Plex's `syncplex users` equivalent.
+"""Account management CLI — the only way accounts are created.
 
 Run inside the deployed container so it hits the real database:
   docker compose -f docker_compose_projects.yaml exec solitaire-web \

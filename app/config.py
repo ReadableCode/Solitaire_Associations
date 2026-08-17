@@ -1,9 +1,8 @@
 """Environment resolution.
 
 Runs in two places with the same code (no docker-only paths):
-  - elitedesk container: env injected via env_file -> personal_credentials/personal.env
-    plus the overrides in deploy/compose.elitedesk.yaml
-  - bare local run: .env symlink -> ../personal_credentials/personal.env
+  - container: env injected via env_file plus the overrides in the deploy compose
+  - bare local run: .env in the repo root
 """
 
 import os
@@ -44,14 +43,10 @@ POSTGRES_PASSWORD = _env("POSTGRES_PASSWORD")
 POSTGREST_URL = _env("POSTGREST_URL").rstrip("/")
 JWT_SECRET = _env("POSTGREST_JWT_SECRET") or _env("JWT_SECRET")
 
-SESSION_MAX_AGE_SECONDS = 30 * 24 * 3600  # matches Sync_Plex
+SESSION_MAX_AGE_SECONDS = 30 * 24 * 3600
 SESSION_COOKIE = "solitaire_session"
 
 HTTP_TIMEOUT = 10.0
-
-# Path to a Sync_Plex users.json to import accounts from at startup.
-# Empty = importer disabled. Enabled later via a compose change (git deploy).
-SYNCPLEX_USERS_IMPORT = _env("SOLITAIRE_IMPORT_SYNCPLEX_USERS")
 
 LEVELS_PATH = Path(_env("SOLITAIRE_LEVELS_PATH") or REPO_ROOT / "data" / "levels.json")
 

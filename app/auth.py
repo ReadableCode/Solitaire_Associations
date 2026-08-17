@@ -1,4 +1,4 @@
-"""Sessions and login rate limiting — Sync_Plex semantics, JWT transport.
+"""Sessions and login rate limiting, JWT transport.
 
 The session cookie holds an HS256 JWT signed with the shared PostgREST secret,
 with role=<schema>_user so the very same token is the Bearer token for

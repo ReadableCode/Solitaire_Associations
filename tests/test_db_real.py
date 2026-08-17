@@ -9,7 +9,6 @@ import uuid
 import pytest
 
 from app import bootstrap, config
-from app.syncplex_import import import_users
 from app.users import UserStore, db_reachable, hash_password
 
 
@@ -59,40 +58,20 @@ def test_validation_rules(store):
         store.add("ztestshortpw", "short")
 
 
-def test_syncplex_import_shape(store, temp_username, tmp_path):
-    """Round-trip a Sync_Plex-format users.json: hash must verify unchanged."""
-    import json
-
-    password = "imported-password-1"
-    users_json = tmp_path / "users.json"
-    users_json.write_text(
-        json.dumps(
-            {
-                "users": [
-                    {
-                        "username": temp_username,
-                        "password_hash": hash_password(password),
-                        "role": "admin",
-                        "display_name": "Imported",
-                        "disabled": False,
-                        "created_at": "2025-01-01T00:00:00+00:00",
-                        "password_changed_at": "2025-01-01T00:00:00+00:00",
-                    }
-                ]
-            }
-        )
+def test_add_prehashed_verifies_unchanged(store, temp_username):
+    """An already-computed argon2id hash must verify as-is once stored."""
+    password = "prehashed-password-1"
+    store.add_prehashed(
+        temp_username,
+        hash_password(password),
+        role="admin",
+        display_name="Prehashed",
     )
-    imported, skipped = import_users(store, users_json)
-    assert (imported, skipped) == (1, 0)
 
     user = store.verify(temp_username, password)
-    assert user is not None, "imported argon2id hash must verify as-is"
+    assert user is not None, "stored argon2id hash must verify as-is"
     assert user.role == "admin"
-    assert user.display_name == "Imported"
-    assert user.created_at.year == 2025
-
-    imported, skipped = import_users(store, users_json)
-    assert (imported, skipped) == (0, 1), "second import must not touch existing rows"
+    assert user.display_name == "Prehashed"
 
 
 def test_users_table_hidden_from_postgrest_roles(store):

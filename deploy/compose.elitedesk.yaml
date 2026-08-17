@@ -15,14 +15,8 @@ services:
       POSTGRES_URL: postgres
       POSTGRES_PORT: "5432"
       POSTGRES_DB: apps
-      # Idempotent Sync_Plex account import: inserts missing accounts (hash
-      # intact) at startup, never touches existing rows or the mounted file.
-      SOLITAIRE_IMPORT_SYNCPLEX_USERS: /syncplex_data/users.json
     env_file:
       - ../personal_credentials/personal.env
-    volumes:
-      # Sync_Plex account source for the importer — READ-ONLY, never written.
-      - /home/jason/docker_app_data/syncplex:/syncplex_data:ro
     depends_on:
       - postgres
       - postgrest

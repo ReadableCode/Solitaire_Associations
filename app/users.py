@@ -1,9 +1,9 @@
-"""User accounts — Sync_Plex semantics backed by solitaire.users.
+"""User accounts, backed by solitaire.users.
 
-Same rules as Sync_Plex's engine/web/users.py: argon2id hashes, lowercase
-usernames, dummy-hash timing safety, transparent rehash, password_changed_at
-bumped on password/enable/disable so existing sessions die. The table is
-REVOKEd from the PostgREST roles; only this process (superuser) reads it.
+argon2id hashes, lowercase usernames, dummy-hash timing safety, transparent
+rehash, password_changed_at bumped on password/enable/disable so existing
+sessions die. The table is REVOKEd from the PostgREST roles; only this
+process (superuser) reads it.
 """
 
 from __future__ import annotations
@@ -120,7 +120,7 @@ class UserStore:
         created_at: datetime | None = None,
         disabled: bool = False,
     ) -> User:
-        """Insert with an existing argon2 hash (Sync_Plex account import)."""
+        """Insert with an already-computed argon2 hash."""
         username = username.strip().lower()
         with self._conn() as conn, conn.cursor() as cur:
             cur.execute(
@@ -165,8 +165,8 @@ class UserStore:
         self._invalidate(username)
 
     def set_disabled(self, username: str, disabled: bool) -> None:
-        # Bump password_changed_at in both directions, like Sync_Plex: disabling
-        # kills sessions, and re-enabling must not resurrect pre-disable ones.
+        # Bump password_changed_at in both directions: disabling kills sessions,
+        # and re-enabling must not resurrect pre-disable ones.
         with self._conn() as conn, conn.cursor() as cur:
             cur.execute(
                 f"""UPDATE {config.APP_SCHEMA}.users

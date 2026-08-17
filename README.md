@@ -16,9 +16,9 @@ card, undo refunds the last move.
   keyed on the JWT `user_id` claim). The only direct-DB paths are the same
   ones every sibling app has: startup bootstrap, login verification, and the
   account CLI.
-- **Accounts work exactly like Sync_Plex**: argon2id hashes, lowercase
-  usernames, timing-safe verify, 5-failure/15-minute lockout per user and
-  per IP, 30-day sessions revoked by `password_changed_at`, no self-signup.
+- **Accounts**: argon2id hashes, lowercase usernames, timing-safe verify,
+  5-failure/15-minute lockout per user and per IP, 30-day sessions revoked
+  by `password_changed_at`, no self-signup.
   The session cookie holds an HS256 JWT signed with the shared PostgREST
   secret (`role: solitaire_user`), forwarded verbatim as the PostgREST
   Bearer token.
@@ -64,9 +64,8 @@ docker compose -f docker_compose_projects.yaml exec solitaire-web \
     python -m app.users_cli <add|list|passwd|role|disable|enable|remove> ...
 ```
 
-Sync_Plex account import: set `SOLITAIRE_IMPORT_SYNCPLEX_USERS` to the
-mounted `users.json` path (see `deploy/compose.elitedesk.yaml`). Idempotent —
-existing rows are never touched; the mount is read-only.
+Accounts are created only through that CLI. There is no self-signup and no
+import path: this app never reads another app's storage.
 
 ## Deploy
 

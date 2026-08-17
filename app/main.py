@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
-from . import auth, bootstrap, config, icons, store, syncplex_import
+from . import auth, bootstrap, config, icons, store
 from .users import UserStore, db_reachable
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
@@ -46,7 +46,6 @@ async def _lifespan(app: FastAPI):
     _load_levels()
     icons.load()
     await run_in_threadpool(bootstrap.bootstrap_best_effort)
-    await run_in_threadpool(syncplex_import.import_best_effort, users)
     yield
 
 
