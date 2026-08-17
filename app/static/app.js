@@ -148,22 +148,22 @@ async function loadHome() {
   renderHome();
 }
 
-function highestUnlocked() {
-  let unlocked = 1;
+function nextUncompleted() {
   for (const lvl of S.levels) {
-    if (S.progress.get(lvl.id)?.completed) unlocked = Math.max(unlocked, lvl.id + 1);
+    if (!S.progress.get(lvl.id)?.completed) return lvl.id;
   }
-  return unlocked;
+  return null;
 }
 
 function renderHome() {
-  const unlocked = highestUnlocked();
+  // Levels are playable in any order; "current" is just a visual nudge
+  // toward the first one not yet completed.
+  const suggested = nextUncompleted();
   const cells = S.levels.map((lvl) => {
     const done = S.progress.get(lvl.id)?.completed;
-    const locked = lvl.id > unlocked;
     return el("div", {
-      class: `level-cell ${done ? "done" : ""} ${locked ? "locked" : ""} ${lvl.id === unlocked ? "current" : ""}`,
-      onclick: () => !locked && startLevel(lvl.id),
+      class: `level-cell ${done ? "done" : ""} ${lvl.id === suggested ? "current" : ""}`,
+      onclick: () => startLevel(lvl.id),
     }, String(lvl.id));
   });
   const banner = S.savedGame
@@ -323,6 +323,7 @@ function renderGame() {
   const st = S.game.state;
   const hud = el("div", { class: "hud" },
     el("button", { onclick: onQuitToMap }, "‹ Map"),
+    el("div", { class: "level-ind" }, `Level ${st.levelId}`),
     el("div", { class: `moves ${st.movesLeft <= 10 ? "low" : ""}` }, `${st.movesLeft} moves`),
     el("div", { class: "tools" },
       el("button", { onclick: onHint, disabled: st.hintsLeft ? null : "" }, `Hint ${st.hintsLeft}`),

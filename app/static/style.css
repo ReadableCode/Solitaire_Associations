@@ -58,7 +58,6 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
   border: 1px solid #33415a; font-weight: 600;
 }
 .level-cell.done { background: #1d3a2d; border-color: var(--good); color: var(--good); }
-.level-cell.locked { opacity: 0.35; }
 .level-cell.current { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
 .topbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .topbar .who { color: var(--ink-dim); font-size: 14px; }
@@ -70,6 +69,7 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 
 /* --- game HUD --- */
 .hud { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 10px; }
+.hud .level-ind { font-size: 14px; font-weight: 600; color: var(--ink-dim); }
 .hud .moves { font-size: 18px; font-weight: 700; }
 .hud .moves.low { color: var(--warn); }
 .hud .tools { display: flex; gap: 6px; }
