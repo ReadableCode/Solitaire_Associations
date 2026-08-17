@@ -1,0 +1,30 @@
+# Included by Docker/docker_compose_projects.yaml with
+#   project_directory: ../Solitaire_Associations
+# so paths and env resolve from this repo's root.
+services:
+  solitaire-web:
+    image: solitaire_web_image
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: solitaire_web
+    environment:
+      TZ: America/Chicago
+      APP_SCHEMA: solitaire
+      POSTGREST_URL: http://postgrest:3000
+      POSTGRES_URL: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: apps
+      # Enable after the app is verified stable (git deploy of this line):
+      # SOLITAIRE_IMPORT_SYNCPLEX_USERS: /syncplex_data/users.json
+    env_file:
+      - ../personal_credentials/personal.env
+    volumes:
+      # Sync_Plex account source for the importer — READ-ONLY, never written.
+      - /home/jason/docker_app_data/syncplex:/syncplex_data:ro
+    depends_on:
+      - postgres
+      - postgrest
+    ports:
+      - "8790:8790"
+    restart: unless-stopped
