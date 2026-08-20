@@ -119,6 +119,14 @@ button.primary {
 }
 .slot.complete .slot-count { color: #1d6a40; }
 .slot.hinted { border-color: var(--warn); background: rgba(255, 212, 121, 0.14); box-shadow: 0 0 10px rgba(255, 212, 121, 0.35); }
+.slot.mystery {
+  background: rgba(0, 0, 0, 0.22);
+  border-color: rgba(232, 201, 106, 0.45);
+  color: var(--chalk-dim);
+  cursor: default;
+}
+.slot.mystery .slot-name { font-size: 20px; font-family: Georgia, serif; color: var(--gold); }
+.slot.reveal-pop { animation: revealpop 0.5s; }
 .slot.flash-good { animation: flashgood 0.5s; }
 .slot.flash-bad { animation: shake 0.4s; border-color: var(--bad); }
 
@@ -175,6 +183,36 @@ button.primary {
     repeating-linear-gradient(45deg, transparent 0 5px, var(--card-back-dark) 5px 6px),
     repeating-linear-gradient(-45deg, transparent 0 5px, var(--card-back-dark) 5px 6px);
 }
+/* gold "ace" card: face-down like the rest, but unmistakably worth digging for */
+.card.down.gold {
+  border-color: var(--gold);
+  box-shadow: 0 0 7px rgba(232, 201, 106, 0.55), 0 2px 3px rgba(0, 0, 0, 0.4);
+}
+.card.down.gold::after {
+  content: "\2605"; /* star */
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 15px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* padlocked card: visible but inert until its key is placed */
+.card.locked { cursor: default; }
+.lock-badge {
+  position: absolute; inset: 0;
+  border-radius: 9px;
+  background: rgba(28, 30, 40, 0.38);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.key-badge {
+  position: absolute; top: 2px; right: 3px;
+  font-size: 12px; line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+
 .card.selected {
   transform: translateY(-8px);
   box-shadow: 0 0 0 2.5px var(--gold), 0 6px 12px rgba(0, 0, 0, 0.45);
@@ -265,6 +303,11 @@ button.primary {
 @keyframes flashgood {
   0% { background: rgba(127, 224, 168, 0.35); }
   100% { background: transparent; }
+}
+@keyframes revealpop {
+  0% { transform: scale(0.85); box-shadow: 0 0 0 3px var(--gold), 0 0 14px rgba(232, 201, 106, 0.6); }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); }
 }
 
 @media (max-width: 420px) {

@@ -6,6 +6,22 @@ four categories. Place accessible cards into the right category before the
 move budget runs out. Hints reveal a card's category, jokers auto-place a
 card, undo refunds the last move.
 
+Two mechanics from the original ride on top of that core:
+
+- **Gold cards** — categories start hidden ("?" slots). Each has a gold
+  "ace" card buried in the first four tableau columns; uncovering it flies
+  it to its slot for free and reveals the group. Words can only be placed
+  into revealed slots.
+- **Lock & key** — from level 61, the top card of a column past the gold
+  columns is padlocked and unplayable. Its key is a normal word card
+  (marked 🔑) elsewhere in the deal; correctly placing the key breaks the
+  lock.
+
+Both are dealt so they cost a perfect player zero extra moves (golds are
+auto-collected free and chained under already-placeable covers; the key's
+placement is a scoring move it needed anyway), which keeps the budget
+formula and the winnability guarantees below untouched.
+
 ## Architecture
 
 - **FastAPI** app serving a vanilla-JS frontend (`app/static/`), port 8790.
@@ -38,6 +54,10 @@ each level in `data/levels.json`:
 | `move_budget` | 3.5x a perfect solve | 1.27x |
 | `tableau_frac` | 60% of the deck dealt face-down | 90% |
 | `hints` / `jokers` | 3 / 1 | 0 / 0 |
+| `locks` | 0 (first lock at level 61, two from 91) | 2 |
+
+Every level also carries `golds: true`; the engine caps `locks` at
+columns − 4 so locks never collide with the gold columns.
 
 A perfect solve is one placement per card plus one draw per stock card, so
 the budget is never below it — `tests/test_engine.mjs` plays all 150 levels
@@ -47,8 +67,9 @@ more slack, deeper hints, or a shallower tableau than the level before it.
 
 Re-tune by editing `curve()` and running `python3 gen_levels.py`, which
 rewrites `data/levels.json` deterministically from the quad bank above it.
-`engine.js` falls back to the old flat values (60% / 3 / 1) for any level
-missing the fields.
+`engine.js` falls back to the old flat values (60% / 3 / 1, no golds, no
+locks) for any level missing the fields, and old saved games without the
+gold/lock fields still resume.
 
 ## Schema bootstrap
 

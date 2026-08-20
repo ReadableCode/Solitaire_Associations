@@ -2,7 +2,7 @@
 // backend (cookie session), which talks to PostgREST. State is autosaved
 // after every action; closing the tab flushes via sendBeacon.
 
-import * as engine from "/static/engine.js?v=1";
+import * as engine from "/static/engine.js?v=2";
 
 const app = document.getElementById("app");
 
@@ -15,6 +15,7 @@ const S = {
   key: null, // word -> slot index
   selected: null, // {type:'column'|'waste', index}
   hintedSlot: null,
+  revealedSeen: new Set(), // slot indexes already shown revealed (for the pop)
   savedGame: null, // state loaded from server, not yet resumed
   dirty: false,
 };
@@ -195,12 +196,17 @@ async function startLevel(levelId, { fresh = false } = {}) {
     const resumed = engine.resumeGame(level, S.savedGame);
     if (resumed) {
       S.game = resumed;
+      // no reveal-pop for slots that were already open when we left
+      S.revealedSeen = new Set(
+        resumed.state.slots.flatMap((s, i) => (s.revealed !== false ? [i] : []))
+      );
       renderGame();
       return;
     }
   }
   S.game = engine.newGame(level, (Math.random() * 0xffffffff) >>> 0);
   S.savedGame = null;
+  S.revealedSeen = new Set();
   scheduleSave();
   renderGame();
 }
@@ -229,6 +235,7 @@ async function finishLevel(won) {
 // --- game actions ------------------------------------------------------------
 
 function guarded(fn) {
+  const locksBefore = Object.keys(S.game.state.locks || {}).length;
   try {
     fn();
     S.selected = null;
@@ -237,6 +244,9 @@ function guarded(fn) {
   } catch (err) {
     if (err instanceof engine.GameError) toast(err.message);
     else throw err;
+  }
+  if (Object.keys(S.game.state.locks || {}).length < locksBefore) {
+    toast("\u{1F513} lock opened!");
   }
   afterAction();
 }
@@ -264,6 +274,11 @@ function onColumnTap(index) {
   if (S.selected && !(S.selected.type === "column" && S.selected.index === index)) {
     guarded(() => engine.moveToColumn(S.game, S.selected, index));
   } else {
+    const w = engine.topOfColumn(S.game.state, index);
+    if (w != null && engine.isLocked(S.game.state, w)) {
+      toast("locked — place its \u{1F511} key card to open it");
+      return;
+    }
     onSelect({ type: "column", index });
   }
 }
@@ -362,9 +377,21 @@ function renderGame() {
 
   const slots = el("div", { class: "slots" },
     st.slots.map((slot, i) => {
+      if (slot.revealed === false) {
+        S.revealedSeen.delete(i); // undo can re-hide a slot; let it pop again
+        return el("div", {
+          class: `slot mystery ${S.hintedSlot === i ? "hinted" : ""}`,
+          "data-slot": String(i),
+          onclick: () => toast("uncover its ★ gold card to reveal this group"),
+        },
+          el("div", { class: "slot-name" }, "?"),
+          el("div", { class: "slot-count" }, `? / ${slot.total}`));
+      }
+      const pop = !S.revealedSeen.has(i);
+      S.revealedSeen.add(i);
       const complete = slot.placed.length === slot.total;
       return el("div", {
-        class: `slot ${complete ? "complete" : ""} ${S.hintedSlot === i ? "hinted" : ""}`,
+        class: `slot ${complete ? "complete" : ""} ${S.hintedSlot === i ? "hinted" : ""} ${pop ? "reveal-pop" : ""}`,
         "data-slot": String(i),
         onclick: () => !complete && onSlotTap(i),
       },
@@ -372,15 +399,27 @@ function renderGame() {
         el("div", { class: "slot-count" }, complete ? "✓ complete" : `${slot.placed.length} / ${slot.total}`));
     }));
 
+  const keyWords = new Set(Object.values(st.locks || {}));
   const columns = el("div", { class: "tableau" },
     st.columns.map((col, i) => {
       const isSel = S.selected?.type === "column" && S.selected.index === i;
       const cards = col.map((card, j) => {
         const top = j === col.length - 1;
+        if (card.gold) {
+          // buried gold "ace": face-down but recognizable, worth digging for
+          return el("div", { class: "card down gold" });
+        }
+        const locked = engine.isLocked(st, card.w);
         return el("div", {
-          class: `card ${card.up ? "up" : "down"} ${top && isSel ? "selected" : ""}`,
+          class: `card ${card.up ? "up" : "down"} ${top && isSel ? "selected" : ""} ${card.up && locked ? "locked" : ""}`,
           onclick: top ? (e) => { e.stopPropagation(); onColumnTap(i); } : undefined,
-        }, card.up ? cardFace(card.w) : "");
+        }, card.up
+          ? [
+              ...cardFace(card.w),
+              locked ? el("div", { class: "lock-badge" }, "\u{1F512}") : null,
+              keyWords.has(card.w) ? el("div", { class: "key-badge" }, "\u{1F511}") : null,
+            ]
+          : "");
       });
       return el("div", { class: "column", onclick: () => onColumnTap(i) },
         cards.length ? cards : el("div", { class: "column-empty" }, "empty"));
@@ -400,7 +439,10 @@ function renderGame() {
         ? el("div", {
             class: `card up ${wasteSel ? "selected" : ""}`,
             onclick: () => onSelect({ type: "waste" }),
-          }, cardFace(wasteTop))
+          }, [
+            ...cardFace(wasteTop),
+            keyWords.has(wasteTop) ? el("div", { class: "key-badge" }, "\u{1F511}") : null,
+          ])
         : el("div", { class: "column-empty" }, "waste"),
       el("div", { class: "pile-label" }, st.waste.length ? `waste (${st.waste.length})` : "waste")));
 

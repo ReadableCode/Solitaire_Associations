@@ -19,7 +19,7 @@ const KEY = engine.answerKey(LEVEL);
 
 function allWords(state) {
   const words = [];
-  state.columns.forEach((c) => c.forEach((card) => words.push(card.w)));
+  state.columns.forEach((c) => c.forEach((card) => { if (!card.gold) words.push(card.w); }));
   words.push(...state.stock, ...state.waste);
   state.slots.forEach((s) => words.push(...s.placed));
   return words;
@@ -135,21 +135,24 @@ test("hint returns the right slot without costing a move; joker places free", ()
 });
 
 function solve(game, key = KEY) {
-  // Greedy: place whatever is accessible; draw when nothing is.
+  // Greedy: place whatever is accessible and placeable (revealed category,
+  // not padlocked); draw when nothing is. The gold/lock deal guarantees this
+  // wins at exactly one placement per card plus one draw per stock card.
   let safety = 2000;
   while (game.state.status === "playing" && safety-- > 0) {
     let placed = false;
     for (let i = 0; i < game.state.columns.length; i++) {
       const word = engine.topOfColumn(game.state, i);
-      if (word != null) {
-        engine.place(game, { type: "column", index: i }, key.get(word), key);
-        placed = true;
-        break;
-      }
+      if (word == null || engine.isLocked(game.state, word)) continue;
+      const slot = key.get(word);
+      if (game.state.slots[slot].revealed === false) continue;
+      engine.place(game, { type: "column", index: i }, slot, key);
+      placed = true;
+      break;
     }
     if (placed || game.state.status !== "playing") continue;
     const wasteWord = engine.topOfWaste(game.state);
-    if (wasteWord != null) {
+    if (wasteWord != null && game.state.slots[key.get(wasteWord)].revealed !== false) {
       engine.place(game, { type: "waste" }, key.get(wasteWord), key);
     } else {
       engine.draw(game);
@@ -183,6 +186,102 @@ test("every shipped level is winnable by a player who knows every answer", () =>
       );
     }
   }
+});
+
+// --- gold category cards -----------------------------------------------------
+
+const GLEVEL = { ...LEVEL, golds: true };
+// difficulty 5 -> 6 columns, so there is room past the gold columns for locks
+const LLEVEL = { ...LEVEL, difficulty: 5, golds: true, locks: 2 };
+
+test("gold deal: categories start hidden, the top gold auto-reveals, rest stay buried", () => {
+  const a = engine.createGame(GLEVEL, 42);
+  const b = engine.createGame(GLEVEL, 42);
+  assert.deepEqual(a, b, "still deterministic per seed");
+  assert.equal(a.slots.filter((s) => s.revealed).length, 1);
+  assert.equal(a.columns.flat().filter((c) => c.gold).length, 3);
+  assert.equal(allWords(a).length, 16, "golds are extra cards, not words");
+});
+
+test("placing into a hidden category is rejected without costing a move", () => {
+  const game = engine.newGame(GLEVEL, 42);
+  const hiddenIdx = game.state.slots.findIndex((s) => !s.revealed);
+  const col = game.state.columns.findIndex((c) => c.length);
+  assert.throws(
+    () => engine.place(game, { type: "column", index: col }, hiddenIdx, KEY),
+    engine.GameError
+  );
+  assert.equal(game.state.movesLeft, GLEVEL.move_budget);
+});
+
+test("golds are budget-neutral: a perfect solve costs the same as without them", () => {
+  for (const seed of [1, 2, 3]) {
+    const plain = engine.newGame(LEVEL, seed);
+    assert.equal(solve(plain), "won");
+    const gold = engine.newGame(GLEVEL, seed);
+    assert.equal(solve(gold), "won", `seed ${seed}`);
+    assert.equal(gold.state.movesLeft, plain.state.movesLeft);
+    assert.ok(gold.state.slots.every((s) => s.revealed));
+  }
+});
+
+// --- locks and keys ----------------------------------------------------------
+
+test("locked cards cannot be played until their key is placed", () => {
+  const game = engine.newGame(LLEVEL, 3);
+  const entries = Object.entries(game.state.locks);
+  assert.equal(entries.length, 2);
+  const lockedWord = entries[0][0];
+  const colIdx = game.state.columns.findIndex(
+    (c) => c.length && c[c.length - 1].w === lockedWord
+  );
+  assert.ok(colIdx >= 4, "locks live past the four gold columns");
+  assert.equal(engine.accessibleWord(game.state, { type: "column", index: colIdx }), null);
+  assert.throws(
+    () => engine.place(game, { type: "column", index: colIdx }, KEY.get(lockedWord), KEY),
+    engine.GameError
+  );
+  assert.throws(
+    () => engine.joker(game, { type: "column", index: colIdx }, KEY),
+    engine.GameError
+  );
+  // a perfect solve places the keys along the way, opens both locks, and wins
+  assert.equal(solve(game), "won");
+  assert.deepEqual(game.state.locks, {});
+});
+
+test("lock count is capped by available columns", () => {
+  const st = engine.createGame({ ...LEVEL, locks: 2 }, 5); // difficulty 1 -> 4 columns
+  assert.deepEqual(st.locks, {});
+});
+
+test("gold/lock states round-trip through save validation; tampered ones are rejected", () => {
+  const game = engine.newGame(LLEVEL, 8);
+  engine.draw(game);
+  const saved = JSON.parse(JSON.stringify(game.state));
+  assert.ok(engine.resumeGame(LLEVEL, saved));
+
+  const noGold = JSON.parse(JSON.stringify(saved));
+  for (const col of noGold.columns) {
+    const i = col.findIndex((c) => c.gold); // hidden category with no gold = unwinnable
+    if (i >= 0) col.splice(i, 1);
+  }
+  assert.equal(engine.resumeGame(LLEVEL, noGold), null);
+
+  const earlyReveal = JSON.parse(JSON.stringify(saved));
+  earlyReveal.slots.forEach((s) => { s.revealed = true; }); // golds still in play
+  assert.equal(engine.resumeGame(LLEVEL, earlyReveal), null);
+
+  const selfKey = JSON.parse(JSON.stringify(saved));
+  const lw = Object.keys(selfKey.locks)[0];
+  selfKey.locks[lw] = lw;
+  assert.equal(engine.resumeGame(LLEVEL, selfKey), null);
+
+  // saves from before golds/locks existed still resume
+  const legacy = JSON.parse(JSON.stringify(engine.createGame(LEVEL, 8)));
+  delete legacy.locks;
+  legacy.slots.forEach((s) => { delete s.revealed; });
+  assert.ok(engine.resumeGame(LEVEL, legacy));
 });
 
 test("running out of moves loses", () => {

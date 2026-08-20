@@ -133,18 +133,25 @@ def curve(lid):
     budget_ratio = 3.5 - 2.25 * p              # multiple of a perfect solve
     hints = 3 if p < 0.20 else 2 if p < 0.45 else 1 if p < 0.70 else 0
     jokers = 1 if p < 0.50 else 0
-    return tableau_frac, budget_ratio, hints, jokers
+    # Padlocked cards enter at level 61 (5 columns) and double at 91 (6):
+    # the engine caps locks at columns - 4, so the count must not outrun
+    # the column curve.
+    locks = 0 if p < 0.4 else 1 if p < 0.6 else 2
+    return tableau_frac, budget_ratio, hints, jokers, locks
 
 def level(lid, diff, quad, lo, hi):
     cats = [{"name": n, "words": words(ws)[lo:hi]} for n, ws in quad]
     cards = sum(len(c["words"]) for c in cats)
-    tableau_frac, budget_ratio, hints, jokers = curve(lid)
+    tableau_frac, budget_ratio, hints, jokers, locks = curve(lid)
     # A perfect solve is one placement per card plus one draw per stock card;
-    # the engine deals ceil(cards * tableau_frac) to the tableau.
+    # the engine deals ceil(cards * tableau_frac) to the tableau. Gold cards
+    # and locks are budget-neutral by construction (see engine.js), so they
+    # don't appear in this formula.
     stock = cards - math.ceil(cards * tableau_frac)
     budget = round((cards + stock) * budget_ratio)
     return {"id": lid, "difficulty": diff, "move_budget": budget,
             "tableau_frac": tableau_frac, "hints": hints, "jokers": jokers,
+            "golds": True, "locks": locks,
             "categories": cats}
 
 levels = []

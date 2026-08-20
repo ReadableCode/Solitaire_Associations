@@ -55,10 +55,15 @@ def test_every_level_stays_winnable():
 
 
 def test_difficulty_knobs_are_in_range():
+    # Columns per difficulty, mirroring columnsForDifficulty() in engine.js.
+    # Locks may never outrun columns - 4 or the engine silently drops them.
+    columns = {1: 4, 2: 4, 3: 5, 4: 6, 5: 6}
     for lvl in _levels():
         assert 0.5 <= lvl["tableau_frac"] <= 0.95, lvl["id"]
         assert 0 <= lvl["hints"] <= 3, lvl["id"]
         assert 0 <= lvl["jokers"] <= 1, lvl["id"]
+        assert lvl["golds"] is True, lvl["id"]
+        assert 0 <= lvl["locks"] <= columns[lvl["difficulty"]] - 4, lvl["id"]
 
 
 def test_pressure_ramps_monotonically_across_the_whole_bank():
@@ -76,6 +81,7 @@ def test_pressure_ramps_monotonically_across_the_whole_bank():
         assert cur["tableau_frac"] >= prev["tableau_frac"], cur["id"]
         assert cur["hints"] <= prev["hints"], cur["id"]
         assert cur["jokers"] <= prev["jokers"], cur["id"]
+        assert cur["locks"] >= prev["locks"], cur["id"]
 
 
 def test_the_curve_actually_spans_a_meaningful_range():

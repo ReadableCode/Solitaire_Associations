@@ -10,6 +10,15 @@
 //     wrong placements bounce back but still consume the move.
 //   - Hints reveal a card's category (no move). Jokers auto-place a card
 //     correctly (no move). Undo reverts the last move and refunds it.
+//   - Gold cards (level.golds): categories start hidden; each has a gold
+//     "ace" card buried in the tableau that flies to its slot for free the
+//     moment it is uncovered. Words can only be placed into revealed slots.
+//   - Locks (level.locks): the top card of a column past the four gold
+//     columns is padlocked — unplayable until its key card (a normal word
+//     somewhere reachable) is correctly placed, which breaks the lock.
+//   - Both are dealt so a perfect solve still costs one placement per card
+//     plus one draw per stock card: golds are free and auto-collected, and
+//     the key's placement is a scoring move it needed anyway.
 //   - Win: all cards sorted. Lose: move budget exhausted first.
 
 export function mulberry32(seed) {
@@ -67,10 +76,8 @@ export function createGame(level, seed) {
   for (let i = 0; i < tableauCount; i++) {
     columns[i % numCols].push({ w: deck[i], up: false });
   }
-  columns.forEach((col) => {
-    if (col.length) col[col.length - 1].up = true;
-  });
-  return {
+  const useGolds = level.golds === true;
+  const state = {
     levelId: level.id,
     seed,
     difficulty: level.difficulty,
@@ -84,11 +91,87 @@ export function createGame(level, seed) {
       name: c.name,
       total: c.words.length,
       placed: [],
+      revealed: !useGolds,
     })),
     columns,
     stock: deck.slice(tableauCount),
     waste: [],
+    locks: {},
   };
+  if (useGolds) dealGolds(state, level, rng);
+  dealLocks(state, level, rng);
+  state.columns.forEach((col) => {
+    if (col.length) col[col.length - 1].up = true;
+  });
+  collectGolds(state);
+  return state;
+}
+
+// Bury the four gold "ace" cards so a knowing player uncovers them without
+// a single wasted move: gold i sits in column i under exactly i cards from
+// the previously-revealed category, so reveals chain from the first (which
+// starts on top) with only placements that score anyway.
+function dealGolds(state, level, rng) {
+  const catOrder = shuffled([0, 1, 2, 3], rng);
+  const catOf = answerKey(level);
+  const reserved = new Set(); // cards already arranged as gold cover
+  for (let i = 0; i < 4; i++) {
+    const col = state.columns[i];
+    const cover = Math.min(i, col.length);
+    for (let d = 0; d < cover; d++) {
+      const target = col[col.length - 1 - d];
+      if (catOf.get(target.w) !== catOrder[i - 1]) {
+        swapIn(state, target, catOrder[i - 1], catOf, reserved);
+      }
+      reserved.add(target);
+    }
+    col.splice(col.length - cover, 0, { gold: true, cat: catOrder[i], up: false });
+  }
+}
+
+// Swap a word of the wanted category into `target` from the stock or from an
+// unarranged tableau position. Always succeeds: a cover needs at most 3 words
+// of one category and every category has at least 4.
+function swapIn(state, target, wantCat, catOf, reserved) {
+  for (let i = 0; i < state.stock.length; i++) {
+    if (catOf.get(state.stock[i]) === wantCat) {
+      [state.stock[i], target.w] = [target.w, state.stock[i]];
+      return;
+    }
+  }
+  for (const col of state.columns) {
+    for (const card of col) {
+      if (card !== target && !card.gold && !reserved.has(card) &&
+          catOf.get(card.w) === wantCat) {
+        [card.w, target.w] = [target.w, card.w];
+        return;
+      }
+    }
+  }
+  throw new Error("no cover card available for gold deal");
+}
+
+// Padlock the top card of columns past the four gold columns. The key is a
+// word in the stock or in a gold column — both fully reachable without ever
+// touching the locked column, so the level stays winnable at perfect cost.
+function dealLocks(state, level, rng) {
+  const want = Math.min(knob(level, "locks", 0), state.columns.length - 4);
+  for (let k = 0; k < want; k++) {
+    const col = state.columns[4 + k];
+    const lockCard = col[col.length - 1];
+    if (!lockCard || lockCard.gold) continue;
+    const used = new Set(Object.keys(state.locks));
+    for (const v of Object.values(state.locks)) used.add(v);
+    const candidates = [];
+    for (let c = 0; c < 4; c++) {
+      for (const card of state.columns[c]) {
+        if (!card.gold && !used.has(card.w)) candidates.push(card.w);
+      }
+    }
+    for (const w of state.stock) if (!used.has(w)) candidates.push(w);
+    if (!candidates.length || used.has(lockCard.w)) continue;
+    state.locks[lockCard.w] = candidates[Math.floor(rng() * candidates.length)];
+  }
 }
 
 export function cloneState(state) {
@@ -106,10 +189,17 @@ export function topOfWaste(state) {
   return state.waste.length ? state.waste[state.waste.length - 1] : null;
 }
 
+export function isLocked(state, word) {
+  return !!state.locks && Object.prototype.hasOwnProperty.call(state.locks, word);
+}
+
 export function accessibleWord(state, source) {
   if (!source) return null;
   if (source.type === "waste") return topOfWaste(state);
-  if (source.type === "column") return topOfColumn(state, source.index);
+  if (source.type === "column") {
+    const w = topOfColumn(state, source.index);
+    return w != null && isLocked(state, w) ? null : w;
+  }
   return null;
 }
 
@@ -141,18 +231,44 @@ function spendMove(state) {
   }
 }
 
+// An uncovered gold card flies to its foundation slot for free and reveals
+// the category; the card it exposes flips (and may cascade another gold).
+function collectGolds(state) {
+  let moved = true;
+  while (moved) {
+    moved = false;
+    for (const col of state.columns) {
+      const top = col.length ? col[col.length - 1] : null;
+      if (top && top.gold) {
+        col.pop();
+        state.slots[top.cat].revealed = true;
+        if (col.length) col[col.length - 1].up = true;
+        moved = true;
+      }
+    }
+  }
+}
+
 function settle(state) {
+  collectGolds(state);
   if (isWon(state)) state.status = "won";
+}
+
+// Correctly placing a key card breaks the lock it opens.
+function unlockByKey(state, word) {
+  for (const [lockedWord, keyWord] of Object.entries(state.locks)) {
+    if (keyWord === word) delete state.locks[lockedWord];
+  }
 }
 
 function removeFromSource(state, source) {
   if (source.type === "waste") {
-    return state.waste.pop();
+    return { w: state.waste.pop(), up: true };
   }
   const column = state.columns[source.index];
   const card = column.pop();
   if (column.length) column[column.length - 1].up = true;
-  return card.w;
+  return card;
 }
 
 // Every mutating action goes through act(): snapshot -> mutate -> settle.
@@ -173,8 +289,17 @@ export function newGame(level, seed) {
 }
 
 export function resumeGame(level, savedState) {
-  if (!validateSavedState(level, savedState)) return null;
-  return { state: cloneState(savedState), history: [] };
+  if (!savedState || typeof savedState !== "object") return null;
+  const state = cloneState(savedState);
+  // saves from before golds/locks existed lack these fields
+  if (!state.locks || typeof state.locks !== "object") state.locks = {};
+  if (Array.isArray(state.slots)) {
+    state.slots.forEach((s) => {
+      if (s && s.revealed === undefined) s.revealed = true;
+    });
+  }
+  if (!validateSavedState(level, state)) return null;
+  return { state, history: [] };
 }
 
 export function draw(game) {
@@ -200,8 +325,9 @@ export function moveToColumn(game, source, targetCol) {
     }
     const word = accessibleWord(state, source);
     if (word == null) throw new GameError("no card there");
-    removeFromSource(state, source);
-    state.columns[targetCol].push({ w: word, up: true });
+    const card = removeFromSource(state, source);
+    card.up = true;
+    state.columns[targetCol].push(card);
     spendMove(state);
   });
 }
@@ -210,12 +336,14 @@ export function place(game, source, slotIndex, key) {
   return act(game, (state) => {
     const slot = state.slots[slotIndex];
     if (!slot) throw new GameError("no such slot");
+    if (slot.revealed === false) throw new GameError("category not revealed yet");
     const word = accessibleWord(state, source);
     if (word == null) throw new GameError("no card there");
     const correct = key.get(word) === slotIndex;
     if (correct) {
       removeFromSource(state, source);
       slot.placed.push(word);
+      unlockByKey(state, word);
     } else {
       state.wrongGuesses += 1;
     }
@@ -240,8 +368,12 @@ export function joker(game, source, key) {
     const word = accessibleWord(state, source);
     if (word == null) throw new GameError("no card there");
     const slotIndex = key.get(word);
+    if (state.slots[slotIndex].revealed === false) {
+      throw new GameError("category not revealed yet");
+    }
     removeFromSource(state, source);
     state.slots[slotIndex].placed.push(word);
+    unlockByKey(state, word);
     state.jokersLeft -= 1; // no spendMove: jokers are free
     return slotIndex;
   });
@@ -264,11 +396,27 @@ export function validateSavedState(level, state) {
   const key = answerKey(level);
   const seen = new Set();
   const every = [];
+  const columnWords = new Set();
+  const goldsSeen = new Set();
   try {
-    state.columns.forEach((col) => col.forEach((c) => every.push(c.w)));
+    state.columns.forEach((col) => col.forEach((c) => {
+      if (c && c.gold === true) {
+        if (!Number.isInteger(c.cat) || c.cat < 0 || c.cat > 3 || goldsSeen.has(c.cat)) {
+          throw new Error("bad gold");
+        }
+        goldsSeen.add(c.cat);
+      } else {
+        every.push(c.w);
+        columnWords.add(c.w);
+      }
+    }));
     every.push(...state.stock, ...state.waste);
     state.slots.forEach((s, i) => {
       if (s.total !== level.categories[i].words.length) throw new Error("shape");
+      const revealed = s.revealed !== false;
+      if (!revealed && s.placed.length) throw new Error("placed in hidden slot");
+      // a hidden slot needs its gold still in play; a revealed one must not
+      if (revealed === goldsSeen.has(i)) throw new Error("gold mismatch");
       s.placed.forEach((w) => {
         if (key.get(w) !== i) throw new Error("misplaced");
         every.push(w);
@@ -281,6 +429,15 @@ export function validateSavedState(level, state) {
   for (const w of every) {
     if (!key.has(w) || seen.has(w)) return false;
     seen.add(w);
+  }
+  if (state.locks !== undefined) {
+    if (!state.locks || typeof state.locks !== "object" || Array.isArray(state.locks)) return false;
+    const placed = new Set(state.slots.flatMap((s) => s.placed));
+    for (const [lockedWord, keyWord] of Object.entries(state.locks)) {
+      // a locked card can never leave its column; a placed key opens its lock
+      if (!key.has(lockedWord) || !key.has(keyWord) || lockedWord === keyWord) return false;
+      if (!columnWords.has(lockedWord) || placed.has(keyWord)) return false;
+    }
   }
   if (typeof state.movesLeft !== "number" || state.movesLeft <= 0) return false;
   return true;

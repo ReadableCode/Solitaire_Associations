@@ -6,6 +6,8 @@
     "tableau_frac": 0.6,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Fruits",
@@ -52,6 +54,8 @@
     "tableau_frac": 0.602,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Vegetables",
@@ -98,6 +102,8 @@
     "tableau_frac": 0.604,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Birds",
@@ -144,6 +150,8 @@
     "tableau_frac": 0.606,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Farm Animals",
@@ -190,6 +198,8 @@
     "tableau_frac": 0.6081,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Insects",
@@ -236,6 +246,8 @@
     "tableau_frac": 0.6101,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Trees",
@@ -282,6 +294,8 @@
     "tableau_frac": 0.6121,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Freshwater Fish",
@@ -328,6 +342,8 @@
     "tableau_frac": 0.6141,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Reptiles",
@@ -374,6 +390,8 @@
     "tableau_frac": 0.6161,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Big Cats",
@@ -420,6 +438,8 @@
     "tableau_frac": 0.6181,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Shellfish",
@@ -466,6 +486,8 @@
     "tableau_frac": 0.6201,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Zoo Animals",
@@ -512,6 +534,8 @@
     "tableau_frac": 0.6221,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Berries",
@@ -558,6 +582,8 @@
     "tableau_frac": 0.6242,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Nuts",
@@ -604,6 +630,8 @@
     "tableau_frac": 0.6262,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Pond Life",
@@ -650,6 +678,8 @@
     "tableau_frac": 0.6282,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Dinosaurs",
@@ -696,6 +726,8 @@
     "tableau_frac": 0.6302,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Rodents",
@@ -742,6 +774,8 @@
     "tableau_frac": 0.6322,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Primates",
@@ -788,6 +822,8 @@
     "tableau_frac": 0.6342,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Baby Animals",
@@ -834,6 +870,8 @@
     "tableau_frac": 0.6362,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Types of Sharks",
@@ -880,6 +918,8 @@
     "tableau_frac": 0.6383,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Mythical Creatures",
@@ -926,6 +966,8 @@
     "tableau_frac": 0.6403,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Pets",
@@ -972,6 +1014,8 @@
     "tableau_frac": 0.6423,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Rivers",
@@ -1018,6 +1062,8 @@
     "tableau_frac": 0.6443,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Deserts",
@@ -1064,6 +1110,8 @@
     "tableau_frac": 0.6463,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Mountains",
@@ -1110,6 +1158,8 @@
     "tableau_frac": 0.6483,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Farm Crops",
@@ -1156,6 +1206,8 @@
     "tableau_frac": 0.6503,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Constellations",
@@ -1202,6 +1254,8 @@
     "tableau_frac": 0.6523,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Beach Items",
@@ -1248,6 +1302,8 @@
     "tableau_frac": 0.6544,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Chess Pieces",
@@ -1294,6 +1350,8 @@
     "tableau_frac": 0.6564,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Currencies",
@@ -1340,6 +1398,8 @@
     "tableau_frac": 0.6584,
     "hints": 3,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Sundae Toppings",
@@ -1386,6 +1446,8 @@
     "tableau_frac": 0.6604,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Sundae Toppings",
@@ -1436,6 +1498,8 @@
     "tableau_frac": 0.6624,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Currencies",
@@ -1486,6 +1550,8 @@
     "tableau_frac": 0.6644,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Chess Pieces",
@@ -1536,6 +1602,8 @@
     "tableau_frac": 0.6664,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Beach Items",
@@ -1586,6 +1654,8 @@
     "tableau_frac": 0.6685,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Constellations",
@@ -1636,6 +1706,8 @@
     "tableau_frac": 0.6705,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Farm Crops",
@@ -1686,6 +1758,8 @@
     "tableau_frac": 0.6725,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Mountains",
@@ -1736,6 +1810,8 @@
     "tableau_frac": 0.6745,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Deserts",
@@ -1786,6 +1862,8 @@
     "tableau_frac": 0.6765,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Rivers",
@@ -1836,6 +1914,8 @@
     "tableau_frac": 0.6785,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Pets",
@@ -1886,6 +1966,8 @@
     "tableau_frac": 0.6805,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Mythical Creatures",
@@ -1936,6 +2018,8 @@
     "tableau_frac": 0.6826,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Types of Sharks",
@@ -1986,6 +2070,8 @@
     "tableau_frac": 0.6846,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Baby Animals",
@@ -2036,6 +2122,8 @@
     "tableau_frac": 0.6866,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Primates",
@@ -2086,6 +2174,8 @@
     "tableau_frac": 0.6886,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Rodents",
@@ -2136,6 +2226,8 @@
     "tableau_frac": 0.6906,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Dinosaurs",
@@ -2186,6 +2278,8 @@
     "tableau_frac": 0.6926,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Pond Life",
@@ -2236,6 +2330,8 @@
     "tableau_frac": 0.6946,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Nuts",
@@ -2286,6 +2382,8 @@
     "tableau_frac": 0.6966,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Berries",
@@ -2336,6 +2434,8 @@
     "tableau_frac": 0.6987,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Zoo Animals",
@@ -2386,6 +2486,8 @@
     "tableau_frac": 0.7007,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Shellfish",
@@ -2436,6 +2538,8 @@
     "tableau_frac": 0.7027,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Big Cats",
@@ -2486,6 +2590,8 @@
     "tableau_frac": 0.7047,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Reptiles",
@@ -2536,6 +2642,8 @@
     "tableau_frac": 0.7067,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Freshwater Fish",
@@ -2586,6 +2694,8 @@
     "tableau_frac": 0.7087,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Trees",
@@ -2636,6 +2746,8 @@
     "tableau_frac": 0.7107,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Insects",
@@ -2686,6 +2798,8 @@
     "tableau_frac": 0.7128,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Farm Animals",
@@ -2736,6 +2850,8 @@
     "tableau_frac": 0.7148,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Birds",
@@ -2786,6 +2902,8 @@
     "tableau_frac": 0.7168,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Vegetables",
@@ -2836,6 +2954,8 @@
     "tableau_frac": 0.7188,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 0,
     "categories": [
       {
         "name": "Fruits",
@@ -2886,6 +3006,8 @@
     "tableau_frac": 0.7208,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Things That Are Red",
@@ -2936,6 +3058,8 @@
     "tableau_frac": 0.7228,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Rhymes With CAT",
@@ -2986,6 +3110,8 @@
     "tableau_frac": 0.7248,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "SUN Compounds",
@@ -3036,6 +3162,8 @@
     "tableau_frac": 0.7268,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Things That Are Cold",
@@ -3086,6 +3214,8 @@
     "tableau_frac": 0.7289,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "State Capitals",
@@ -3136,6 +3266,8 @@
     "tableau_frac": 0.7309,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Types of Puzzles",
@@ -3186,6 +3318,8 @@
     "tableau_frac": 0.7329,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words Before STICK",
@@ -3236,6 +3370,8 @@
     "tableau_frac": 0.7349,
     "hints": 2,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words After FIRE",
@@ -3286,6 +3422,8 @@
     "tableau_frac": 0.7369,
     "hints": 1,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words Before WORM",
@@ -3336,6 +3474,8 @@
     "tableau_frac": 0.7389,
     "hints": 1,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words After RAIN",
@@ -3386,6 +3526,8 @@
     "tableau_frac": 0.7409,
     "hints": 1,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "World Landmarks",
@@ -3436,6 +3578,8 @@
     "tableau_frac": 0.743,
     "hints": 1,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words After BLACK",
@@ -3486,6 +3630,8 @@
     "tableau_frac": 0.745,
     "hints": 1,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words Before LIGHT",
@@ -3536,6 +3682,8 @@
     "tableau_frac": 0.747,
     "hints": 1,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Things You Can Break",
@@ -3586,6 +3734,8 @@
     "tableau_frac": 0.749,
     "hints": 1,
     "jokers": 1,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words After OVER",
@@ -3636,6 +3786,8 @@
     "tableau_frac": 0.751,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words After OVER",
@@ -3686,6 +3838,8 @@
     "tableau_frac": 0.753,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Things You Can Break",
@@ -3736,6 +3890,8 @@
     "tableau_frac": 0.755,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words Before LIGHT",
@@ -3786,6 +3942,8 @@
     "tableau_frac": 0.757,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words After BLACK",
@@ -3836,6 +3994,8 @@
     "tableau_frac": 0.7591,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "World Landmarks",
@@ -3886,6 +4046,8 @@
     "tableau_frac": 0.7611,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words After RAIN",
@@ -3936,6 +4098,8 @@
     "tableau_frac": 0.7631,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words Before WORM",
@@ -3986,6 +4150,8 @@
     "tableau_frac": 0.7651,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words After FIRE",
@@ -4036,6 +4202,8 @@
     "tableau_frac": 0.7671,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Words Before STICK",
@@ -4086,6 +4254,8 @@
     "tableau_frac": 0.7691,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Types of Puzzles",
@@ -4136,6 +4306,8 @@
     "tableau_frac": 0.7711,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "State Capitals",
@@ -4186,6 +4358,8 @@
     "tableau_frac": 0.7732,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Things That Are Cold",
@@ -4236,6 +4410,8 @@
     "tableau_frac": 0.7752,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "SUN Compounds",
@@ -4286,6 +4462,8 @@
     "tableau_frac": 0.7772,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Rhymes With CAT",
@@ -4336,6 +4514,8 @@
     "tableau_frac": 0.7792,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 1,
     "categories": [
       {
         "name": "Things That Are Red",
@@ -4386,6 +4566,8 @@
     "tableau_frac": 0.7812,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before BOARD",
@@ -4440,6 +4622,8 @@
     "tableau_frac": 0.7832,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Animal Homophones",
@@ -4494,6 +4678,8 @@
     "tableau_frac": 0.7852,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before CAKE",
@@ -4548,6 +4734,8 @@
     "tableau_frac": 0.7872,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "___ FLY",
@@ -4602,6 +4790,8 @@
     "tableau_frac": 0.7893,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before JACK",
@@ -4656,6 +4846,8 @@
     "tableau_frac": 0.7913,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before MAN",
@@ -4710,6 +4902,8 @@
     "tableau_frac": 0.7933,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before STONE",
@@ -4764,6 +4958,8 @@
     "tableau_frac": 0.7953,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Things With Teeth",
@@ -4818,6 +5014,8 @@
     "tableau_frac": 0.7973,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before POT",
@@ -4872,6 +5070,8 @@
     "tableau_frac": 0.7993,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Silent Letter Words",
@@ -4926,6 +5126,8 @@
     "tableau_frac": 0.8013,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before HORN",
@@ -4980,6 +5182,8 @@
     "tableau_frac": 0.8034,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words After BOOK",
@@ -5034,6 +5238,8 @@
     "tableau_frac": 0.8054,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Kinds of Rings",
@@ -5088,6 +5294,8 @@
     "tableau_frac": 0.8074,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before FALL",
@@ -5142,6 +5350,8 @@
     "tableau_frac": 0.8094,
     "hints": 1,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before WOOD",
@@ -5196,6 +5406,8 @@
     "tableau_frac": 0.8114,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words After BREAK",
@@ -5250,6 +5462,8 @@
     "tableau_frac": 0.8134,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before PRINT",
@@ -5304,6 +5518,8 @@
     "tableau_frac": 0.8154,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before BERRY",
@@ -5358,6 +5574,8 @@
     "tableau_frac": 0.8174,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words That Precede HOUSE",
@@ -5412,6 +5630,8 @@
     "tableau_frac": 0.8195,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "___ BAR",
@@ -5466,6 +5686,8 @@
     "tableau_frac": 0.8215,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words After EYE",
@@ -5520,6 +5742,8 @@
     "tableau_frac": 0.8235,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before COAT",
@@ -5574,6 +5798,8 @@
     "tableau_frac": 0.8255,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before WALK",
@@ -5628,6 +5854,8 @@
     "tableau_frac": 0.8275,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before DOG",
@@ -5682,6 +5910,8 @@
     "tableau_frac": 0.8295,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before SHIP",
@@ -5736,6 +5966,8 @@
     "tableau_frac": 0.8315,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before ROOM",
@@ -5790,6 +6022,8 @@
     "tableau_frac": 0.8336,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words After HEAD",
@@ -5844,6 +6078,8 @@
     "tableau_frac": 0.8356,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before TRAP",
@@ -5898,6 +6134,8 @@
     "tableau_frac": 0.8376,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before BOX",
@@ -5952,6 +6190,8 @@
     "tableau_frac": 0.8396,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before MILL",
@@ -6006,6 +6246,8 @@
     "tableau_frac": 0.8416,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before MILL",
@@ -6064,6 +6306,8 @@
     "tableau_frac": 0.8436,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before BOX",
@@ -6122,6 +6366,8 @@
     "tableau_frac": 0.8456,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before TRAP",
@@ -6180,6 +6426,8 @@
     "tableau_frac": 0.8477,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words After HEAD",
@@ -6238,6 +6486,8 @@
     "tableau_frac": 0.8497,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before ROOM",
@@ -6296,6 +6546,8 @@
     "tableau_frac": 0.8517,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before SHIP",
@@ -6354,6 +6606,8 @@
     "tableau_frac": 0.8537,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before DOG",
@@ -6412,6 +6666,8 @@
     "tableau_frac": 0.8557,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before WALK",
@@ -6470,6 +6726,8 @@
     "tableau_frac": 0.8577,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before COAT",
@@ -6528,6 +6786,8 @@
     "tableau_frac": 0.8597,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words After EYE",
@@ -6586,6 +6846,8 @@
     "tableau_frac": 0.8617,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "___ BAR",
@@ -6644,6 +6906,8 @@
     "tableau_frac": 0.8638,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words That Precede HOUSE",
@@ -6702,6 +6966,8 @@
     "tableau_frac": 0.8658,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before BERRY",
@@ -6760,6 +7026,8 @@
     "tableau_frac": 0.8678,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before PRINT",
@@ -6818,6 +7086,8 @@
     "tableau_frac": 0.8698,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words After BREAK",
@@ -6876,6 +7146,8 @@
     "tableau_frac": 0.8718,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before WOOD",
@@ -6934,6 +7206,8 @@
     "tableau_frac": 0.8738,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before FALL",
@@ -6992,6 +7266,8 @@
     "tableau_frac": 0.8758,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Kinds of Rings",
@@ -7050,6 +7326,8 @@
     "tableau_frac": 0.8779,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words After BOOK",
@@ -7108,6 +7386,8 @@
     "tableau_frac": 0.8799,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before HORN",
@@ -7166,6 +7446,8 @@
     "tableau_frac": 0.8819,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Silent Letter Words",
@@ -7224,6 +7506,8 @@
     "tableau_frac": 0.8839,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before POT",
@@ -7282,6 +7566,8 @@
     "tableau_frac": 0.8859,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Things With Teeth",
@@ -7340,6 +7626,8 @@
     "tableau_frac": 0.8879,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before STONE",
@@ -7398,6 +7686,8 @@
     "tableau_frac": 0.8899,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before MAN",
@@ -7456,6 +7746,8 @@
     "tableau_frac": 0.8919,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before JACK",
@@ -7514,6 +7806,8 @@
     "tableau_frac": 0.894,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "___ FLY",
@@ -7572,6 +7866,8 @@
     "tableau_frac": 0.896,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before CAKE",
@@ -7630,6 +7926,8 @@
     "tableau_frac": 0.898,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Animal Homophones",
@@ -7688,6 +7986,8 @@
     "tableau_frac": 0.9,
     "hints": 0,
     "jokers": 0,
+    "golds": true,
+    "locks": 2,
     "categories": [
       {
         "name": "Words Before BOARD",
