@@ -6,8 +6,9 @@
 //   - Cards are dealt into tableau columns (only the top card of a column is
 //     accessible; buried cards are face-down) plus a face-down stock.
 //   - Actions costing 1 move: draw from stock (recycles waste when empty),
-//     repositioning a card between columns, and every category placement —
-//     wrong placements bounce back but still consume the move.
+//     repositioning a card between columns (onto an empty column the whole
+//     face-up run travels together), and every category placement — wrong
+//     placements bounce back but still consume the move.
 //   - Hints reveal a card's category (no move). Jokers auto-place a card
 //     correctly (no move). Undo reverts the last move and refunds it.
 //   - Gold cards (level.golds): categories start hidden; each has a gold
@@ -203,6 +204,21 @@ export function accessibleWord(state, source) {
   return null;
 }
 
+// Index where the movable face-up run on top of a column begins
+// (column.length when nothing is movable). The run stops at a face-down
+// card, a gold, or a padlocked card — those never travel.
+export function runStart(state, col) {
+  const column = state.columns[col];
+  if (!column) return 0;
+  let start = column.length;
+  while (start > 0) {
+    const card = column[start - 1];
+    if (!card.up || card.gold || isLocked(state, card.w)) break;
+    start--;
+  }
+  return start;
+}
+
 export function isWon(state) {
   return state.slots.every((s) => s.placed.length === s.total);
 }
@@ -325,6 +341,16 @@ export function moveToColumn(game, source, targetCol) {
     }
     const word = accessibleWord(state, source);
     if (word == null) throw new GameError("no card there");
+    // Onto an empty column the whole face-up run travels as one move,
+    // uncovering the face-down cards beneath (like the base game).
+    if (source.type === "column" && state.columns[targetCol].length === 0) {
+      const column = state.columns[source.index];
+      const run = column.splice(runStart(state, source.index));
+      if (column.length) column[column.length - 1].up = true;
+      state.columns[targetCol].push(...run);
+      spendMove(state);
+      return;
+    }
     const card = removeFromSource(state, source);
     card.up = true;
     state.columns[targetCol].push(card);

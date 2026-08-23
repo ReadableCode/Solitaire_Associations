@@ -109,6 +109,60 @@ test("moveToColumn repositions and costs a move", () => {
   assert.throws(() => engine.moveToColumn(game, { type: "column", index: to }, to), engine.GameError);
 });
 
+test("a face-up run moves whole onto an empty column, uncovering what was beneath", () => {
+  const game = engine.newGame(LEVEL, 9);
+  // build a 3-card face-up run on column 0 (each stack costs a move)
+  engine.moveToColumn(game, { type: "column", index: 1 }, 0);
+  engine.moveToColumn(game, { type: "column", index: 2 }, 0);
+  const col0 = game.state.columns[0];
+  assert.equal(engine.runStart(game.state, 0), col0.length - 3);
+  const run = col0.slice(-3).map((c) => c.w);
+  const buriedBefore = col0.length - 3;
+
+  // empty out column 3, then drop the run there
+  while (game.state.columns[3].length) {
+    const w = engine.topOfColumn(game.state, 3);
+    engine.place(game, { type: "column", index: 3 }, KEY.get(w), KEY);
+  }
+  const movesBefore = game.state.movesLeft;
+  engine.moveToColumn(game, { type: "column", index: 0 }, 3);
+  assert.equal(game.state.movesLeft, movesBefore - 1, "whole run costs one move");
+  assert.deepEqual(game.state.columns[3].map((c) => c.w), run, "order preserved");
+  assert.equal(game.state.columns[0].length, buriedBefore);
+  assert.ok(game.state.columns[0][buriedBefore - 1].up, "uncovered card flips");
+
+  // onto a NON-empty column only the top card moves, as before
+  engine.moveToColumn(game, { type: "column", index: 3 }, 0);
+  assert.equal(game.state.columns[3].length, 2);
+  assert.equal(engine.topOfColumn(game.state, 0), run[2]);
+});
+
+test("a mid-run padlocked card pins itself and everything below it", () => {
+  // locks without golds: all categories revealed, so columns can be emptied
+  const game = engine.newGame({ ...LEVEL, difficulty: 5, locks: 1 }, 3);
+  const lockedWord = Object.keys(game.state.locks)[0];
+  const lockCol = game.state.columns.findIndex(
+    (c) => c.length && c[c.length - 1].w === lockedWord
+  );
+  // bury the locked card under a free card, then empty another column
+  const freeCol = game.state.columns.findIndex(
+    (c, i) => i !== lockCol && c.length && !engine.isLocked(game.state, c[c.length - 1].w)
+  );
+  engine.moveToColumn(game, { type: "column", index: freeCol }, lockCol);
+  while (game.state.columns[freeCol].length) {
+    const w = engine.topOfColumn(game.state, freeCol);
+    engine.place(game, { type: "column", index: freeCol }, KEY.get(w), KEY);
+  }
+  assert.equal(engine.runStart(game.state, lockCol), game.state.columns[lockCol].length - 1);
+  engine.moveToColumn(game, { type: "column", index: lockCol }, freeCol);
+  assert.equal(game.state.columns[freeCol].length, 1, "only the card above the lock moved");
+  assert.equal(
+    game.state.columns[lockCol][game.state.columns[lockCol].length - 1].w,
+    lockedWord,
+    "locked card never leaves its column"
+  );
+});
+
 test("undo reverts state and refunds the move", () => {
   const game = engine.newGame(LEVEL, 11);
   const snapshot = engine.cloneState(game.state);

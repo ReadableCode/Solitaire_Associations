@@ -2,7 +2,7 @@
 // backend (cookie session), which talks to PostgREST. State is autosaved
 // after every action; closing the tab flushes via sendBeacon.
 
-import * as engine from "/static/engine.js?v=2";
+import * as engine from "/static/engine.js?v=3";
 
 const app = document.getElementById("app");
 
@@ -403,6 +403,9 @@ function renderGame() {
   const columns = el("div", { class: "tableau" },
     st.columns.map((col, i) => {
       const isSel = S.selected?.type === "column" && S.selected.index === i;
+      // when selected, the whole movable run lights up — it travels together
+      // if dropped on an empty column
+      const runFrom = isSel ? engine.runStart(st, i) : col.length;
       const cards = col.map((card, j) => {
         const top = j === col.length - 1;
         if (card.gold) {
@@ -411,7 +414,7 @@ function renderGame() {
         }
         const locked = engine.isLocked(st, card.w);
         return el("div", {
-          class: `card ${card.up ? "up" : "down"} ${top && isSel ? "selected" : ""} ${card.up && locked ? "locked" : ""}`,
+          class: `card ${card.up ? "up" : "down"} ${j >= runFrom ? "selected" : ""} ${card.up && locked ? "locked" : ""}`,
           onclick: top ? (e) => { e.stopPropagation(); onColumnTap(i); } : undefined,
         }, card.up
           ? [
