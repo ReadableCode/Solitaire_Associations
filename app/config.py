@@ -41,6 +41,7 @@ POSTGRES_USER = _env("POSTGRES_USER")
 POSTGRES_PASSWORD = _env("POSTGRES_PASSWORD")
 
 POSTGREST_URL = _env("POSTGREST_URL").rstrip("/")
+AUTH_URL = _env("AUTH_URL", "https://auth.tinkernet.me").rstrip("/")
 JWT_SECRET = _env("POSTGREST_JWT_SECRET") or _env("JWT_SECRET")
 
 SESSION_MAX_AGE_SECONDS = 30 * 24 * 3600

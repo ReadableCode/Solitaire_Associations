@@ -1,8 +1,10 @@
 """Solitaire Associations — FastAPI app.
 
 Browser -> this app (cookie session) -> PostgREST (Bearer JWT, RLS) -> apps DB.
-The only direct-DB paths are the ones every sibling app has: startup schema
-bootstrap, login verification against solitaire.users, and the account CLI.
+Login is delegated to the shared postgrest-auth service (it verifies the
+password and mints the JWT); the only direct-DB paths are the ones every
+sibling app has: startup schema bootstrap, per-request session checks
+against solitaire.users, and the account CLI.
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import psycopg
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -28,7 +31,6 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 MAX_STATE_BYTES = 64 * 1024
 
 users = UserStore()
-limiter = auth.LoginRateLimiter()
 
 _levels: list[dict] = []
 _levels_by_id: dict[int, dict] = {}
@@ -97,19 +99,21 @@ async def login(body: LoginBody, request: Request, response: Response):
     _require_same_origin(request)
     ip = auth.client_ip(request)
     username = body.username.strip().lower()
-    locked = limiter.locked_for(username, ip)
-    if locked:
-        raise HTTPException(status_code=429, detail=f"too many attempts — locked for {locked}s")
-    ok, detail = await run_in_threadpool(db_reachable)
-    if not ok:
-        log.error("login unavailable, db unreachable: %s", detail)
+    try:
+        token = await run_in_threadpool(auth.login_via_service, username, body.password, ip)
+    except auth.AuthServiceError as exc:
+        if exc.status_code == 503:
+            log.error("login unavailable: %s", exc.detail)
+        raise HTTPException(status_code=exc.status_code, detail=exc.detail)
+    # The response body needs display_name/role, and the read primes the
+    # session cache validate_token uses on every request.
+    try:
+        user = await run_in_threadpool(users.get, username)
+    except psycopg.Error as exc:
+        log.error("login succeeded but account database unreachable: %s", exc)
         raise HTTPException(status_code=503, detail="account database unavailable")
-    user = await run_in_threadpool(users.verify, username, body.password)
-    if user is None:
-        limiter.record_failure(username, ip)
+    if user is None or user.disabled:
         raise HTTPException(status_code=401, detail="invalid username or password")
-    limiter.record_success(username, ip)
-    token = auth.issue_token(user)
     response.set_cookie(
         config.SESSION_COOKIE,
         token,

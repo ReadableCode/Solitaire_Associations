@@ -30,14 +30,15 @@ formula and the winnability guarantees below untouched.
 - **Own schema `solitaire`** in the shared `apps` Postgres. All game data
   goes through the shared **PostgREST** (`Accept-Profile: solitaire`, RLS
   keyed on the JWT `user_id` claim). The only direct-DB paths are the same
-  ones every sibling app has: startup bootstrap, login verification, and the
-  account CLI.
-- **Accounts**: argon2id hashes, lowercase usernames, timing-safe verify,
-  5-failure/15-minute lockout per user and per IP, 30-day sessions revoked
-  by `password_changed_at`, no self-signup.
-  The session cookie holds an HS256 JWT signed with the shared PostgREST
-  secret (`role: solitaire_user`), forwarded verbatim as the PostgREST
-  Bearer token.
+  ones every sibling app has: startup bootstrap, per-request session checks,
+  and the account CLI.
+- **Accounts**: argon2id hashes, lowercase usernames, no self-signup.
+  Password verification is delegated to the shared **postgrest-auth**
+  service (timing-safe, 5-failure/15-minute lockout per user and per IP);
+  30-day sessions are revoked by `password_changed_at`.
+  The session cookie holds the HS256 JWT the service mints with the shared
+  PostgREST secret (`role: solitaire_user`), forwarded verbatim as the
+  PostgREST Bearer token.
 - Game state autosaves after every move (debounced, `sendBeacon` on tab
   close). There is no save/load UI — reload resumes exactly.
 

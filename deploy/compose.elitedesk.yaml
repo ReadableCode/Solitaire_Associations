@@ -12,6 +12,7 @@ services:
       TZ: America/Chicago
       APP_SCHEMA: solitaire
       POSTGREST_URL: http://postgrest:3000
+      AUTH_URL: http://auth:8000
       POSTGRES_URL: postgres
       POSTGRES_PORT: "5432"
       POSTGRES_DB: apps
@@ -20,6 +21,7 @@ services:
     depends_on:
       - postgres
       - postgrest
+      - auth
     ports:
       - "8790:8790"
     restart: unless-stopped

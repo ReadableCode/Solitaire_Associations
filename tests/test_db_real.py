@@ -7,6 +7,7 @@ version-gated bootstrap the app runs at startup (no-op once converged).
 import uuid
 
 import pytest
+from argon2 import PasswordHasher
 
 from app import bootstrap, config
 from app.users import UserStore, db_reachable, hash_password
@@ -34,21 +35,21 @@ def test_account_lifecycle(store, temp_username):
     user = store.add(temp_username, "correct-horse-battery", display_name="Temp")
     assert user.username == temp_username
     assert user.role == "user"
-
-    assert store.verify(temp_username, "correct-horse-battery") is not None
-    assert store.verify(temp_username, "wrong-password-here") is None
-    assert store.verify("no-such-user-at-all", "whatever-password") is None
+    # argon2id at rest — what the shared auth service verifies at login
+    PasswordHasher().verify(store.get(temp_username).password_hash, "correct-horse-battery")
 
     before = store.get(temp_username).password_changed_at
     store.set_password(temp_username, "another-good-password")
     after = store.get(temp_username).password_changed_at
     assert after > before, "password change must bump password_changed_at"
-    assert store.verify(temp_username, "another-good-password") is not None
 
     store.set_disabled(temp_username, True)
-    assert store.verify(temp_username, "another-good-password") is None
+    mid = store.get(temp_username)
+    assert mid.disabled and mid.password_changed_at > after, "disable must revoke sessions"
     store.set_disabled(temp_username, False)
-    assert store.verify(temp_username, "another-good-password") is not None
+    final = store.get(temp_username)
+    assert not final.disabled
+    assert final.password_changed_at > mid.password_changed_at, "re-enable must not resurrect them"
 
 
 def test_validation_rules(store):
@@ -68,8 +69,8 @@ def test_add_prehashed_verifies_unchanged(store, temp_username):
         display_name="Prehashed",
     )
 
-    user = store.verify(temp_username, password)
-    assert user is not None, "stored argon2id hash must verify as-is"
+    user = store.get(temp_username)
+    PasswordHasher().verify(user.password_hash, password)
     assert user.role == "admin"
     assert user.display_name == "Prehashed"
 

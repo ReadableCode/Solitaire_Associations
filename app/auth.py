@@ -1,62 +1,45 @@
-"""Sessions and login rate limiting, JWT transport.
+"""Sessions and JWT transport; password verification is delegated to the
+shared postgrest-auth service.
 
-The session cookie holds an HS256 JWT signed with the shared PostgREST secret,
-with role=<schema>_user so the very same token is the Bearer token for
-PostgREST calls (RLS keys on its user_id claim). Sessions outlive container
-rebuilds (stateless), max age 30 days, and die when password_changed_at moves
-past their issue time — password change, disable, and re-enable all revoke.
+Login: POST credentials to the service (auth.py:login_via_service), which
+owns the KDF policy (argon2id, legacy bcrypt rehashed on login), the
+per-username+per-IP lockout, and the no-enumeration timing defense — one
+copy for every app instead of one per app. The token it returns is the
+session cookie: an HS256 JWT signed with the shared PostgREST secret, with
+role=<schema>_user so the very same token is the Bearer token for PostgREST
+calls (RLS keys on its user_id claim). Sessions outlive container rebuilds
+(stateless), max age 30 days, and die when password_changed_at moves past
+their issue time — password change, disable, and re-enable all revoke.
 """
 
 from __future__ import annotations
 
-import time
 from datetime import UTC, datetime, timedelta
 
+import httpx
 import jwt
 
 from . import config
 from .users import User, UserStore
 
-LOCKOUT_MAX_FAILURES = 5
-LOCKOUT_WINDOW_SECONDS = 15 * 60
-LOCKOUT_DURATION_SECONDS = 15 * 60
+
+class AuthServiceError(Exception):
+    """Login rejected or unreachable; carries the HTTP status to surface."""
+
+    def __init__(self, status_code: int, detail: str):
+        super().__init__(detail)
+        self.status_code = status_code
+        self.detail = detail
 
 
-class LoginRateLimiter:
-    """5 failures / 15 min per username AND per client IP -> 15 min lockout."""
+_client: httpx.Client | None = None
 
-    def __init__(self) -> None:
-        self._failures: dict[str, list[float]] = {}
-        self._locked_until: dict[str, float] = {}
 
-    def _keys(self, username: str, ip: str) -> tuple[str, ...]:
-        keys = [f"user:{username.strip().lower()}"]
-        if ip:
-            keys.append(f"ip:{ip}")
-        return tuple(keys)
-
-    def locked_for(self, username: str, ip: str) -> int:
-        now = time.monotonic()
-        remaining = 0
-        for key in self._keys(username, ip):
-            until = self._locked_until.get(key, 0.0)
-            if until > now:
-                remaining = max(remaining, int(until - now))
-        return remaining
-
-    def record_failure(self, username: str, ip: str) -> None:
-        now = time.monotonic()
-        for key in self._keys(username, ip):
-            window = [t for t in self._failures.get(key, []) if now - t < LOCKOUT_WINDOW_SECONDS]
-            window.append(now)
-            self._failures[key] = window
-            if len(window) >= LOCKOUT_MAX_FAILURES:
-                self._locked_until[key] = now + LOCKOUT_DURATION_SECONDS
-
-    def record_success(self, username: str, ip: str) -> None:
-        for key in self._keys(username, ip):
-            self._failures.pop(key, None)
-            self._locked_until.pop(key, None)
+def _http() -> httpx.Client:
+    global _client
+    if _client is None:
+        _client = httpx.Client(timeout=config.HTTP_TIMEOUT)
+    return _client
 
 
 def client_ip(request) -> str:
@@ -66,17 +49,37 @@ def client_ip(request) -> str:
     return request.client.host if request.client else ""
 
 
-def issue_token(user: User) -> str:
-    now = datetime.now(UTC)
-    payload = {
-        "role": f"{config.APP_SCHEMA}_user",
-        "user_id": user.id,
-        "username": user.username,
-        "app_role": user.role,
-        "iat": now,
-        "exp": now + timedelta(seconds=config.SESSION_MAX_AGE_SECONDS),
-    }
-    return jwt.encode(payload, config.JWT_SECRET, algorithm="HS256")
+def login_via_service(username: str, password: str, ip: str) -> str:
+    """Exchange credentials for a session JWT at the shared auth service.
+
+    The viewer's IP is forwarded so the service's per-IP lockout counts the
+    browser, not this container. ttl_hours keeps the 30-day session policy
+    this app has always had.
+    """
+    try:
+        resp = _http().post(
+            f"{config.AUTH_URL}/token",
+            json={
+                "schema": config.APP_SCHEMA,
+                "username": username,
+                "password": password,
+                "ttl_hours": config.SESSION_MAX_AGE_SECONDS // 3600,
+            },
+            headers={"X-Forwarded-For": ip} if ip else {},
+        )
+    except httpx.HTTPError as exc:
+        raise AuthServiceError(503, "login service unavailable") from exc
+    if resp.status_code == 200:
+        return resp.json()["token"]
+    if resp.status_code == 401:
+        raise AuthServiceError(401, "invalid username or password")
+    if resp.status_code == 429:
+        try:
+            detail = resp.json().get("detail", "too many attempts")
+        except ValueError:
+            detail = "too many attempts"
+        raise AuthServiceError(429, detail)
+    raise AuthServiceError(503, "login service unavailable")
 
 
 def validate_token(token: str, store: UserStore) -> tuple[User, str] | None:

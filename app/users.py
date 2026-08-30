@@ -1,9 +1,10 @@
 """User accounts, backed by solitaire.users.
 
-argon2id hashes, lowercase usernames, dummy-hash timing safety, transparent
-rehash, password_changed_at bumped on password/enable/disable so existing
-sessions die. The table is REVOKEd from the PostgREST roles; only this
-process (superuser) reads it.
+argon2id hashes, lowercase usernames, password_changed_at bumped on
+password/enable/disable so existing sessions die. Password verification
+lives in the shared postgrest-auth service — this store only manages
+accounts (CLI) and serves the per-request session checks. The table is
+REVOKEd from the PostgREST roles; only this process (superuser) reads it.
 """
 
 from __future__ import annotations
@@ -15,7 +16,6 @@ from datetime import UTC, datetime
 
 import psycopg
 from argon2 import PasswordHasher
-from argon2.exceptions import InvalidHashError, VerificationError
 
 from . import config
 
@@ -27,7 +27,6 @@ _USERNAME_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,31}$")
 MIN_PASSWORD_LENGTH = 10
 
 _hasher = PasswordHasher()
-_DUMMY_HASH = _hasher.hash("solitaire-no-such-user")
 
 _CACHE_TTL_SECONDS = 30.0
 
@@ -82,19 +81,6 @@ class UserStore:
             cur.execute(f"SELECT {_COLS} FROM {config.APP_SCHEMA}.users ORDER BY username")
             return [_row_to_user(r) for r in cur.fetchall()]
 
-    def verify(self, username: str, password: str) -> User | None:
-        """Timing-safe: always runs one argon2 verification."""
-        user = self.get(username)
-        try:
-            _hasher.verify(user.password_hash if user else _DUMMY_HASH, password)
-        except (VerificationError, InvalidHashError):
-            return None
-        if user is None or user.disabled:
-            return None
-        if _hasher.check_needs_rehash(user.password_hash):
-            self._set_hash_only(user.username, _hasher.hash(password))
-        return user
-
     def add(
         self,
         username: str,
@@ -140,15 +126,6 @@ class UserStore:
             row = cur.fetchone()
         self._invalidate(username)
         return _row_to_user(row)
-
-    def _set_hash_only(self, username: str, password_hash: str) -> None:
-        """Transparent rehash: does NOT bump password_changed_at."""
-        with self._conn() as conn, conn.cursor() as cur:
-            cur.execute(
-                f"UPDATE {config.APP_SCHEMA}.users SET password_hash = %s WHERE username = %s",
-                (password_hash, username),
-            )
-        self._invalidate(username)
 
     def set_password(self, username: str, password: str) -> None:
         if len(password) < MIN_PASSWORD_LENGTH:
