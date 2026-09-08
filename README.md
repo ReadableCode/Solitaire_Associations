@@ -115,3 +115,19 @@ node --test tests/test_engine.mjs  # engine
 
 DB-backed tests hit the real database and go red when it is unreachable —
 never skipped.
+
+## Reference game and scope
+
+The game being emulated is Solitaire Associations Journey by Hitapps Games
+(App Store id 6748950306). Implemented: core tableau/stock/categories, hints,
+jokers, undo, move budget, gold-border cards that reveal hidden categories
+(`golds: true`, budget-neutral deal), lock and key cards (`locks` knob, level
+61+, key is a normal word card). Deliberately not implemented: coins, lives,
+ads, extra-move purchases, events, daily challenges, journey map theming, and
+wild multi-category cards (they would break the save-state word-multiset
+validation). Gameplay only, by decision.
+
+Auth is argon2id in-app (not the bcrypt auth service): the app verifies and
+mints its own HS256 JWT with `POSTGREST_JWT_SECRET`, role `solitaire_user`.
+Accounts come only from the users CLI; no importer from any other app's data
+will be reintroduced.
