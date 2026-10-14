@@ -1,5 +1,7 @@
 -- Core schema. Idempotent; applied by app/bootstrap.py at startup
 -- (version-gated via solitaire.deploy_meta).
+-- Running this file by hand with psql might work, but it is not the intended
+-- use: change it here and let the app apply it.
 
 CREATE SCHEMA IF NOT EXISTS solitaire;
 

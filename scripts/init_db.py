@@ -1,4 +1,7 @@
-"""Manual wrapper over the same startup bootstrap (Book-Bot scripts/init_db.py)."""
+"""Manual wrapper over the same startup bootstrap (Book-Bot scripts/init_db.py).
+
+The app does this itself at startup; running it by hand is not the intended use.
+"""
 
 import argparse
 import logging

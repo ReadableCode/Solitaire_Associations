@@ -1,5 +1,8 @@
 -- Row-level security: every PostgREST request only sees its own rows,
 -- keyed on the user_id claim of the JWT. Idempotent (DROP/CREATE pairs).
+-- Applied by app/bootstrap.py at startup.
+-- Running this file by hand with psql might work, but it is not the intended
+-- use: change it here and let the app apply it.
 
 CREATE OR REPLACE FUNCTION solitaire.jwt_user_id() RETURNS uuid
 LANGUAGE plpgsql STABLE AS $$
