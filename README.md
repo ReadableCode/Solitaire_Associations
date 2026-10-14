@@ -127,7 +127,9 @@ ads, extra-move purchases, events, daily challenges, journey map theming, and
 wild multi-category cards (they would break the save-state word-multiset
 validation). Gameplay only, by decision.
 
-Auth is argon2id in-app (not the bcrypt auth service): the app verifies and
-mints its own HS256 JWT with `POSTGREST_JWT_SECRET`, role `solitaire_user`.
+Login is verified by the shared auth service (`POST /token` with schema
+`solitaire`, argon2id hashes, legacy bcrypt rehashed on login); the HS256 JWT
+it returns, role `solitaire_user`, is both the session cookie and the Bearer
+token for PostgREST (`app/auth.py`).
 Accounts come only from the users CLI; no importer from any other app's data
 will be reintroduced.
