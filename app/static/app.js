@@ -180,7 +180,8 @@ function renderHome() {
         el("button", {
           onclick: async () => { await api("/api/logout", { method: "POST" }); S.me = null; renderLogin(); },
         }, "Log out"))),
-    banner,
+    // replaceChildren, unlike el(), would render a null banner as "null"
+    ...(banner ? [banner] : []),
     el("div", { class: "level-grid" }, cells)
   );
 }
