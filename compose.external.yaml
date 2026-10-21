@@ -4,8 +4,11 @@
 #   docker compose -f compose.external.yaml up --build
 #
 # Your Postgres needs the roles postgrest_authenticator (the login PostgREST
-# connects as) and web_anon, and your PostgREST must list solitaire in
-# PGRST_DB_SCHEMAS. The app creates its schema, its solitaire_user role and
+# connects as) and web_anon, created once by a superuser:
+#   CREATE ROLE postgrest_authenticator LOGIN NOINHERIT PASSWORD '<password>';
+#   CREATE ROLE web_anon NOLOGIN;
+#   GRANT web_anon TO postgrest_authenticator;
+# and your PostgREST must list solitaire in PGRST_DB_SCHEMAS. The app creates its schema, its solitaire_user role and
 # its tables at startup over the superuser connection. Set these in .env:
 #   POSTGREST_URL, POSTGREST_JWT_SECRET (your PostgREST's JWT secret),
 #   POSTGRES_URL, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD

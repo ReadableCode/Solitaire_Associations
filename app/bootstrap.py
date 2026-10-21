@@ -59,8 +59,9 @@ def apply_schema(force: bool = False) -> bool:
                 cur.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", (role,))
                 if cur.fetchone() is None:
                     raise RuntimeError(
-                        f"cluster role {role!r} missing: it is created by the postgres-cluster-roles service "
-                        "in the Docker repo (Docker/postgres/cluster_roles.sql)"
+                        f"cluster role {role!r} missing: compose.yaml creates it on Postgres's first "
+                        "start; with your own Postgres, create it first (see compose.external.yaml). "
+                        "On the author's server the Docker repo's postgres-cluster-roles service does"
                     )
             cur.execute(ROLE_SQL)
             for name in SCHEMA_FILES:
