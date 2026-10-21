@@ -1,12 +1,13 @@
-"""Session token + service-login unit tests (no DB, no network — the store
-is stubbed and the auth service is a mock transport). Tokens are crafted
-with the same claim set postgrest-auth mints."""
+"""Session token + login unit tests (no DB, no network — the store is
+stubbed and postgrest_auth.login is faked). Tokens are crafted with the same
+claim set postgrest_auth.mint_token produces."""
 
 import time
 from datetime import UTC, datetime, timedelta
 
-import httpx
 import jwt as pyjwt
+import postgrest_auth
+import psycopg
 import pytest
 
 from app import auth, config
@@ -34,7 +35,7 @@ def make_user(**overrides) -> User:
 
 
 def mint_token(user: User, **overrides) -> str:
-    """A token shaped exactly like postgrest-auth's /token payload."""
+    """A token shaped exactly like postgrest_auth.mint_token's payload."""
     now = datetime.now(UTC)
     payload = {
         "role": f"{config.APP_SCHEMA}_user",
@@ -56,7 +57,7 @@ class StubStore:
         return self.user if self.user and username == self.user.username else None
 
 
-def test_service_shaped_token_validates():
+def test_login_shaped_token_validates():
     user = make_user()
     token = mint_token(user)
     payload = pyjwt.decode(token, config.JWT_SECRET, algorithms=["HS256"])
@@ -100,50 +101,45 @@ def test_expired_token_rejected():
     assert auth.validate_token(token, StubStore(user)) is None
 
 
-# --- login_via_service --------------------------------------------------------
+# --- login ---------------------------------------------------------------------
 
 
-def _service(monkeypatch, handler):
-    client = httpx.Client(transport=httpx.MockTransport(handler))
-    monkeypatch.setattr(auth, "_http", lambda: client)
-
-
-def test_login_via_service_success(monkeypatch):
+def _fake_login(monkeypatch, outcome):
     seen = {}
 
-    def handler(request: httpx.Request) -> httpx.Response:
-        seen["url"] = str(request.url)
-        seen["body"] = request.read()
-        seen["xff"] = request.headers.get("X-Forwarded-For")
-        return httpx.Response(200, json={"token": "the-token"})
+    def fake(connect, schema, username, password, **kwargs):
+        seen.update(schema=schema, username=username, password=password, **kwargs)
+        if isinstance(outcome, BaseException):
+            raise outcome
+        return outcome
 
-    _service(monkeypatch, handler)
-    assert auth.login_via_service("jason", "pw", "1.2.3.4") == "the-token"
-    assert seen["url"] == f"{config.AUTH_URL}/token"
-    assert seen["xff"] == "1.2.3.4"
-    assert b'"schema"' in seen["body"] and b'"ttl_hours"' in seen["body"]
+    monkeypatch.setattr(auth.postgrest_auth, "login", fake)
+    return seen
 
 
-def test_login_via_service_maps_statuses(monkeypatch):
-    for status, detail_out in (
-        (401, "invalid username or password"),
-        (429, "too many attempts — locked for 3 more minute(s)"),
-        (503, "login service unavailable"),
-        (500, "login service unavailable"),
+def test_login_success(monkeypatch):
+    seen = _fake_login(monkeypatch, "the-token")
+    assert auth.login("jason", "pw", "1.2.3.4") == "the-token"
+    assert seen["schema"] == config.APP_SCHEMA
+    assert seen["client_ip"] == "1.2.3.4"
+    assert seen["ttl_hours"] == 720
+    assert seen["jwt_secret"] == config.JWT_SECRET
+
+
+def test_login_without_ip_passes_none(monkeypatch):
+    seen = _fake_login(monkeypatch, "the-token")
+    auth.login("jason", "pw", "")
+    assert seen["client_ip"] is None
+
+
+def test_login_maps_errors(monkeypatch):
+    for outcome, status, detail in (
+        (postgrest_auth.InvalidCredentials("x"), 401, "invalid username or password"),
+        (postgrest_auth.LoginLocked(150), 429, "too many attempts — locked for 3 more minute(s)"),
+        (psycopg.OperationalError("boom"), 503, "login unavailable"),
     ):
-        _service(monkeypatch, lambda r, s=status: httpx.Response(
-            s, json={"detail": "too many attempts — locked for 3 more minute(s)"}))
-        with pytest.raises(auth.AuthServiceError) as exc:
-            auth.login_via_service("jason", "pw", "1.2.3.4")
-        assert exc.value.status_code == (status if status in (401, 429) else 503)
-        assert exc.value.detail == detail_out
-
-
-def test_login_via_service_unreachable(monkeypatch):
-    def handler(request):
-        raise httpx.ConnectError("boom")
-
-    _service(monkeypatch, handler)
-    with pytest.raises(auth.AuthServiceError) as exc:
-        auth.login_via_service("jason", "pw", "")
-    assert exc.value.status_code == 503
+        _fake_login(monkeypatch, outcome)
+        with pytest.raises(auth.LoginError) as exc:
+            auth.login("jason", "pw", "1.2.3.4")
+        assert exc.value.status_code == status
+        assert exc.value.detail == detail

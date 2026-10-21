@@ -1,10 +1,10 @@
 """Solitaire Associations — FastAPI app.
 
 Browser -> this app (cookie session) -> PostgREST (Bearer JWT, RLS) -> apps DB.
-Login is delegated to the shared postgrest-auth service (it verifies the
+Login runs in-process through the postgrest-auth library (it verifies the
 password and mints the JWT); the only direct-DB paths are the ones every
-sibling app has: startup schema bootstrap, per-request session checks
-against solitaire.users, and the account CLI.
+sibling app has: startup schema bootstrap, login and the per-request session
+checks against solitaire.users, and the account CLI.
 """
 
 from __future__ import annotations
@@ -100,8 +100,8 @@ async def login(body: LoginBody, request: Request, response: Response):
     ip = auth.client_ip(request)
     username = body.username.strip().lower()
     try:
-        token = await run_in_threadpool(auth.login_via_service, username, body.password, ip)
-    except auth.AuthServiceError as exc:
+        token = await run_in_threadpool(auth.login, username, body.password, ip)
+    except auth.LoginError as exc:
         if exc.status_code == 503:
             log.error("login unavailable: %s", exc.detail)
         raise HTTPException(status_code=exc.status_code, detail=exc.detail)

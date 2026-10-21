@@ -1,9 +1,9 @@
 """Real-PostgREST round trip — red until the deployed stack matches.
 
-Uses a throwaway account and logs in through the REAL shared auth service,
-so this exercises the full production path: postgrest-auth verify (argon2id)
--> JWT claims -> session validation -> RLS -> game_state/progress tables.
-Red until the argon2id-capable postgrest-auth is deployed.
+Uses a throwaway account and logs in through the real login path, so this
+exercises the full production path: postgrest-auth library verify (argon2id)
+against the real users table -> JWT claims -> session validation -> RLS ->
+game_state/progress tables.
 """
 
 import uuid
@@ -26,11 +26,11 @@ def session():
     username = f"ztest{uuid.uuid4().hex[:10]}"
     user = users.add(username, "postgrest-roundtrip-pw")
     try:
-        token = auth.login_via_service(username, "postgrest-roundtrip-pw", ip="")
-    except auth.AuthServiceError as exc:
+        token = auth.login(username, "postgrest-roundtrip-pw", ip="")
+    except auth.LoginError as exc:
         users.remove(username)
-        raise AssertionError(f"auth service login failed — red, not skipped: {exc.detail}")
-    assert auth.validate_token(token, users) is not None, "service token must validate in-app"
+        raise AssertionError(f"login failed — red, not skipped: {exc.detail}")
+    assert auth.validate_token(token, users) is not None, "login token must validate in-app"
     yield user, token
     users.remove(username)  # cascades game_state/progress
 

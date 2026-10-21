@@ -96,12 +96,13 @@ browser -> this app (cookie session) -> PostgREST (Bearer JWT, RLS) -> Postgres
 - **Own schema `solitaire`** in a shared `apps` Postgres database. All game
   data goes through a shared **PostgREST** (`Accept-Profile: solitaire`, RLS
   keyed on the JWT `user_id` claim). The only direct-DB paths are the same
-  ones every sibling app has: startup bootstrap, per-request session checks,
-  and the account CLI.
+  ones every sibling app has: startup bootstrap, login and the per-request
+  session checks, and the account CLI.
 - **Accounts**: argon2id hashes, lowercase usernames, no self-signup.
-  Password verification is delegated to a shared **postgrest-auth** service
-  (`POST /token` with schema `solitaire`; timing-safe, legacy bcrypt
-  rehashed on login, 5-failure/15-minute lockout per user and per IP).
+  Passwords are verified in-process by the
+  [postgrest-auth](https://github.com/ReadableCode/postgrest-auth) library
+  against `solitaire.users` (timing-safe, legacy bcrypt rehashed on login,
+  5-failure/15-minute lockout per user and per IP).
   The HS256 JWT it mints with the shared PostgREST secret
   (`role: solitaire_user`) is both the session cookie and, forwarded
   verbatim, the PostgREST Bearer token (`app/auth.py`). Sessions last 30
@@ -111,8 +112,7 @@ browser -> this app (cookie session) -> PostgREST (Bearer JWT, RLS) -> Postgres
 ## Running it
 
 Requirements: Python 3.13 and [uv](https://docs.astral.sh/uv/); node for the
-engine tests. A full setup also needs Postgres, PostgREST and the
-postgrest-auth service.
+engine tests. A full setup also needs Postgres and PostgREST.
 
 ```
 uv sync
@@ -121,12 +121,12 @@ uv run uvicorn app.main:app --port 8790
 
 Configuration is read from the environment, or from `.env` in the repo root
 for a bare local run (see `.env.example`): `APP_SCHEMA`, `POSTGREST_URL`,
-`AUTH_URL`, `POSTGRES_URL` / `POSTGRES_PORT` / `POSTGRES_DB` /
+`POSTGRES_URL` / `POSTGRES_PORT` / `POSTGRES_DB` /
 `POSTGRES_USER` / `POSTGRES_PASSWORD`, `POSTGREST_JWT_SECRET` (must equal
 the PostgREST JWT secret; `JWT_SECRET` is accepted as a fallback name), and
 optionally `SOLITAIRE_LEVELS_PATH` to override `data/levels.json`.
 
-Without the database and the auth service the app still starts and serves
+Without the database and PostgREST the app still starts and serves
 the login page, the level list and a degraded `/api/health`, but nobody can
 log in, so levels cannot be played or saved.
 

@@ -35,7 +35,7 @@ def test_account_lifecycle(store, temp_username):
     user = store.add(temp_username, "correct-horse-battery", display_name="Temp")
     assert user.username == temp_username
     assert user.role == "user"
-    # argon2id at rest — what the shared auth service verifies at login
+    # argon2id at rest — what the postgrest-auth library verifies at login
     PasswordHasher().verify(store.get(temp_username).password_hash, "correct-horse-battery")
 
     before = store.get(temp_username).password_changed_at

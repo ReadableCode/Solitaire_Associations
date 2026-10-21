@@ -2,7 +2,7 @@
 
 argon2id hashes, lowercase usernames, password_changed_at bumped on
 password/enable/disable so existing sessions die. Password verification
-lives in the shared postgrest-auth service — this store only manages
+at login is the postgrest-auth library's (app/auth.py); this store manages
 accounts (CLI) and serves the per-request session checks. The table is
 REVOKEd from the PostgREST roles; only this process (superuser) reads it.
 """
@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 
 import psycopg
-from argon2 import PasswordHasher
+import postgrest_auth
 
 from . import config
 
@@ -25,8 +25,6 @@ ROLES = (ROLE_ADMIN, ROLE_USER)
 
 _USERNAME_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{0,31}$")
 MIN_PASSWORD_LENGTH = 10
-
-_hasher = PasswordHasher()
 
 _CACHE_TTL_SECONDS = 30.0
 
@@ -95,7 +93,7 @@ class UserStore:
             raise ValueError(f"invalid role: {role!r}")
         if len(password) < MIN_PASSWORD_LENGTH:
             raise ValueError(f"password must be at least {MIN_PASSWORD_LENGTH} characters")
-        return self.add_prehashed(username, _hasher.hash(password), role, display_name)
+        return self.add_prehashed(username, postgrest_auth.hash_password(password), role, display_name)
 
     def add_prehashed(
         self,
@@ -135,7 +133,7 @@ class UserStore:
                 f"""UPDATE {config.APP_SCHEMA}.users
                     SET password_hash = %s, password_changed_at = now()
                     WHERE username = %s""",
-                (_hasher.hash(password), username.strip().lower()),
+                (postgrest_auth.hash_password(password), username.strip().lower()),
             )
             if cur.rowcount == 0:
                 raise ValueError(f"no such user: {username}")
@@ -179,7 +177,7 @@ class UserStore:
 
 
 def hash_password(password: str) -> str:
-    return _hasher.hash(password)
+    return postgrest_auth.hash_password(password)
 
 
 def db_reachable() -> tuple[bool, str]:
