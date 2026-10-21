@@ -109,10 +109,45 @@ browser -> this app (cookie session) -> PostgREST (Bearer JWT, RLS) -> Postgres
   days and are revoked by `password_changed_at`, so a password change,
   disable or re-enable logs the user out.
 
+## Run it with Docker
+
+`compose.yaml` is a self-contained stack: Postgres, PostgREST and the app.
+Nothing but Docker needs to be installed. Put three secrets in a `.env`
+file next to it, letters and digits only, since they end up in a connection
+URL and in SQL. This writes them with `openssl rand -hex 32`:
+
+```sh
+cat > .env <<EOF
+POSTGRES_PASSWORD=$(openssl rand -hex 32)
+POSTGREST_DB_PASSWORD=$(openssl rand -hex 32)
+POSTGREST_JWT_SECRET=$(openssl rand -hex 32)
+EOF
+docker compose up --build
+```
+
+Open http://localhost:8790. On its first start Postgres creates the two
+roles PostgREST connects with, and the app creates its own schema, role and
+tables. Data lives in the `postgres_data` volume. `SOLITAIRE_PORT` in
+`.env` changes the host port (default 8790).
+
+There is no self-signup, so create the first account with the account CLI
+in the running container. It prompts twice for the password (10 characters
+or more); usernames are lowercase:
+
+```sh
+docker compose exec solitaire-web python -m app.users_cli add <username>
+```
+
+Already running Postgres and PostgREST? `compose.external.yaml` runs the
+app alone against them
+(`docker compose -f compose.external.yaml up --build`); its header lists
+the settings and the two roles your Postgres needs.
+
 ## Running it
 
-Requirements: Python 3.13 and [uv](https://docs.astral.sh/uv/); node for the
-engine tests. A full setup also needs Postgres and PostgREST.
+Requirements without Docker: Python 3.13 and
+[uv](https://docs.astral.sh/uv/); node for the engine tests. A full setup
+also needs Postgres and PostgREST.
 
 ```
 uv sync

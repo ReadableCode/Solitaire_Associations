@@ -1,0 +1,28 @@
+# Solitaire Associations alone, against a Postgres and PostgREST you already
+# run. Use compose.yaml instead to get both bundled.
+#
+#   docker compose -f compose.external.yaml up --build
+#
+# Your Postgres needs the roles postgrest_authenticator (the login PostgREST
+# connects as) and web_anon, and your PostgREST must list solitaire in
+# PGRST_DB_SCHEMAS. The app creates its schema, its solitaire_user role and
+# its tables at startup over the superuser connection. Set these in .env:
+#   POSTGREST_URL, POSTGREST_JWT_SECRET (your PostgREST's JWT secret),
+#   POSTGRES_URL, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
+name: solitaire-associations
+
+services:
+  solitaire-web:
+    build: .
+    environment:
+      POSTGREST_URL: ${POSTGREST_URL:?set POSTGREST_URL in .env}
+      APP_SCHEMA: solitaire
+      POSTGREST_JWT_SECRET: ${POSTGREST_JWT_SECRET:?set POSTGREST_JWT_SECRET in .env}
+      POSTGRES_URL: ${POSTGRES_URL:?set POSTGRES_URL in .env}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-apps}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      - "${SOLITAIRE_PORT:-8790}:8790"
+    restart: unless-stopped
